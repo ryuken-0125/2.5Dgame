@@ -70,3 +70,24 @@ void Camera::Update()
     target = pos + target;
     m_viewMatrix = XMMatrixLookAtLH(pos, target, up);
 }
+
+void Camera::SetFollowTarget(const DirectX::XMFLOAT3& targetPos, const DirectX::XMFLOAT3& offset)
+{
+    // カメラの位置を「ターゲット + オフセット(距離)」に設定
+    m_position.x = targetPos.x + offset.x;
+    m_position.y = targetPos.y + offset.y;
+    m_position.z = targetPos.z + offset.z;
+
+    // ターゲットの方向を常に見るようにビュー行列を計算
+    DirectX::XMVECTOR pos = DirectX::XMLoadFloat3(&m_position);
+    DirectX::XMVECTOR target = DirectX::XMLoadFloat3(&targetPos);
+    DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+
+    m_viewMatrix = DirectX::XMMatrixLookAtLH(pos, target, up);
+}
+
+void Camera::SetFOV(float fovAngleY, float aspectRatio, float nearZ, float farZ)
+{
+    // プロジェクション行列（レンズの歪み・広さ）を再計算
+    m_projMatrix = DirectX::XMMatrixPerspectiveFovLH(fovAngleY, aspectRatio, nearZ, farZ);
+}

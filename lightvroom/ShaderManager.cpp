@@ -41,6 +41,20 @@ bool ShaderManager::Initialize(ID3D11Device* device, const std::wstring& pbrFile
     if (FAILED(hr)) { OutputErrorMessage(errorBlob.Get()); return false; }
     device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, &m_shadowVertexShader);
 
+    // ★追加：影用の ピクセルシェーダー もコンパイルする（透過切り抜き用）
+    psBlob.Reset(); errorBlob.Reset();
+    hr = D3DCompileFromFile(shadowFilePath.c_str(), nullptr, nullptr, "PSMain", "ps_5_0", compileFlags, 0, &psBlob, &errorBlob);
+    if (FAILED(hr)) { OutputErrorMessage(errorBlob.Get()); return false; }
+    device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &m_shadowPixelShader);
+
+    // ★追加：画像貼り付け用のサンプラー(s0)を作成
+    D3D11_SAMPLER_DESC sampLinearDesc = {};
+    sampLinearDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+    sampLinearDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+    sampLinearDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+    sampLinearDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+    device->CreateSamplerState(&sampLinearDesc, &m_samplerLinear);
+
     // ★追加：5. サンプラーステート（画像を読み込む際の設定）
     D3D11_SAMPLER_DESC sampDesc = {};
     sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
@@ -58,25 +72,29 @@ bool ShaderManager::Initialize(ID3D11Device* device, const std::wstring& pbrFile
 }
 
 // ★修正：パス1（影作成用）のセット
-void ShaderManager::BindShadowPass(ID3D11DeviceContext* context)
+void ShaderManager::BindShadowPass(ID3D11DeviceContext* context, ID3D11ShaderResourceView* textureSRV)
 {
     context->IASetInputLayout(m_inputLayout.Get());
     context->VSSetShader(m_shadowVertexShader.Get(), nullptr, 0);
-    context->PSSetShader(nullptr, nullptr, 0); // 色は塗らないのでPSはNull
+    context->PSSetShader(m_shadowPixelShader.Get(), nullptr, 0); // ★変更：PSもセット
+
+    // 画像があればセットする（シルエット切り抜きのため）
+    if (textureSRV) {
+        context->PSSetShaderResources(0, 1, &textureSRV);
+        context->PSSetSamplers(0, 1, m_samplerLinear.GetAddressOf());
+    }
 }
 
 // パス2（本番描画用）のセット
-
 void ShaderManager::BindMainPass(ID3D11DeviceContext* context, ID3D11ShaderResourceView* shadowSRV)
 {
     context->IASetInputLayout(m_inputLayout.Get());
     context->VSSetShader(m_vertexShader.Get(), nullptr, 0);
     context->PSSetShader(m_pixelShader.Get(), nullptr, 0);
 
-    // シャドウマップの画像とサンプラーをシェーダーに渡す
+    // t0=影画像、s0=画像用サンプラー、s1=影用サンプラー
     context->PSSetShaderResources(0, 1, &shadowSRV);
-
-    // ★ここを 1 に変更しました（HLSLの register(s1) と合わせるため）
+    context->PSSetSamplers(0, 1, m_samplerLinear.GetAddressOf()); // ★追加
     context->PSSetSamplers(1, 1, m_samplerClamp.GetAddressOf());
 }
 

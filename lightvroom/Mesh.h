@@ -24,8 +24,11 @@ public:
     //球体を生成する関数
     bool CreateSphere(ID3D11Device* device, float radius, UINT sliceCount, UINT stackCount);
 
+    bool CreateQuad(ID3D11Device* device);
+
     // 描画（Drawコール）を行う関数
     void Draw(ID3D11DeviceContext* context);
+
 
 private:
     Microsoft::WRL::ComPtr<ID3D11Buffer> m_vertexBuffer; // 頂点バッファ

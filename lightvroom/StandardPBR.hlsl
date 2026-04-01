@@ -38,12 +38,13 @@ cbuffer cbPerMaterial : register(b2)
     float materialRoughness;
     float materialMetallic;
     float materialEmissive;
-    float padMaterial;
+    float useTexture;
 }
 
-Texture2D txShadowMap : register(t0);
-SamplerState samLinear : register(s0);
-SamplerState samClamp : register(s1);
+Texture2D txShadowMap : register(t0); // 影の画像
+Texture2D txAlbedo : register(t1); //キャラクターの画像
+SamplerState samLinear : register(s0); // 画像用のサンプラー
+SamplerState samClamp : register(s1); // 影用のサンプラー
 
 // ==========================================
 // 構造体
@@ -151,6 +152,20 @@ float CalculateShadow(float4 lightSpacePos, float3 N, float3 L)
 float4 PSMain(PS_INPUT input) : SV_TARGET
 {
     float3 albedo = materialAlbedo.rgb;
+    
+    //画像を使う場合の処理
+    if (useTexture > 0.5f)
+    {
+        // 画像から色を吸い出す (t1 にセットされる予定)
+        float4 texColor = txAlbedo.Sample(samLinear, input.TexCoord);
+        
+        //透明度(Alpha)が0.1以下のピクセルは「描画せずに捨てる」！
+        clip(texColor.a - 0.1f);
+        
+        // 画像の色とベースの色を掛け合わせる
+        albedo *= texColor.rgb;
+    }
+    
     float roughness = materialRoughness;
     float metallic = materialMetallic;
     float emissive = materialEmissive;

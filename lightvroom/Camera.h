@@ -11,6 +11,11 @@ public:
     void SetPosition(float x, float y, float z);
     void SetProjection(float fovAngleY, float aspectRatio, float nearZ, float farZ);
 
+    // “Á’è‚Ìƒ^[ƒQƒbƒg‚ğ’Ç]‚·‚éŠÖ”
+    void SetFollowTarget(const DirectX::XMFLOAT3& targetPos, const DirectX::XMFLOAT3& offset);
+    // ‰æŠp(FOV)‚ğ•ÏX‚·‚éŠÖ”
+    void SetFOV(float fovAngleY, float aspectRatio, float nearZ, float farZ);
+
     // ˆÚ“®‚Æ‰ñ“]‚Ì–½—ß
     void MoveForward(float d);
     void MoveRight(float d);

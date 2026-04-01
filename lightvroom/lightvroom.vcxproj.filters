@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="hlsl類">
+      <UniqueIdentifier>{addd4605-08ba-4e85-ae35-45ccfcb22562}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -39,16 +42,19 @@
     <ClCompile Include="ShadowMap.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="PBR_Math.hlsli">
-      <Filter>ソース ファイル</Filter>
-    </None>
-    <None Include="StandardPBR.hlsl">
-      <Filter>ソース ファイル</Filter>
+      <Filter>hlsl類</Filter>
     </None>
     <None Include="Shadow.hlsl">
-      <Filter>ソース ファイル</Filter>
+      <Filter>hlsl類</Filter>
+    </None>
+    <None Include="StandardPBR.hlsl">
+      <Filter>hlsl類</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -74,6 +80,12 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="ShadowMap.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="stb_image.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

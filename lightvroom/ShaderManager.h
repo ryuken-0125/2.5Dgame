@@ -38,6 +38,7 @@ struct CBPerMaterial {
     float metallic;
     float emissive; // 1.0 で物体自体が光源のように光る
     float pad;
+    float useTexture;//1.0なら画像を使う、0.0なら使わない
 };
 
 class ShaderManager
@@ -46,11 +47,11 @@ public:
     ShaderManager();
     ~ShaderManager();
 
-    // ★修正：シャドウ用のファイルパスも受け取る
+    //シャドウ用のファイルパスも受け取る
     bool Initialize(ID3D11Device* device, const std::wstring& pbrFilePath, const std::wstring& shadowFilePath);
 
-    // ★修正：描画パスの切り替え
-    void BindShadowPass(ID3D11DeviceContext* context);
+    //描画パスの切り替え
+    void BindShadowPass(ID3D11DeviceContext* context, ID3D11ShaderResourceView* textureSRV = nullptr);
     void BindMainPass(ID3D11DeviceContext* context, ID3D11ShaderResourceView* shadowSRV);
 
     void UpdatePerFrame(ID3D11DeviceContext* context, const CBPerFrame& data);
@@ -62,9 +63,11 @@ private:
 
     Microsoft::WRL::ComPtr<ID3D11VertexShader> m_vertexShader;
     Microsoft::WRL::ComPtr<ID3D11PixelShader>  m_pixelShader;
-    Microsoft::WRL::ComPtr<ID3D11VertexShader> m_shadowVertexShader; // ★追加
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> m_shadowVertexShader; // 
     Microsoft::WRL::ComPtr<ID3D11InputLayout>  m_inputLayout;
-    Microsoft::WRL::ComPtr<ID3D11SamplerState> m_samplerClamp;       // ★追加：影のギザギザを減らすフィルター
+    Microsoft::WRL::ComPtr<ID3D11SamplerState> m_samplerClamp;       // 影のギザギザを減らすフィルター
+    Microsoft::WRL::ComPtr<ID3D11PixelShader>  m_shadowPixelShader; //
+    Microsoft::WRL::ComPtr<ID3D11SamplerState> m_samplerLinear;     //画像貼り付け用
 
     ConstantBuffer<CBPerFrame> m_cbPerFrame;
     ConstantBuffer<CBPerObject> m_cbPerObject;

@@ -8,6 +8,8 @@
 #include "Camera.h"
 #include "Move.h"
 #include "ShadowMap.h"
+#include "Texture.h"
+
 
 class Application
 {
@@ -36,11 +38,15 @@ private:
     std::unique_ptr<Mesh> m_cubeMesh;
     std::unique_ptr<Mesh> m_sphereMesh;
     std::unique_ptr<Mesh> m_floorMesh; //地面用
+    std::unique_ptr<Mesh> m_quadMesh;//2Dplayer用
 
     std::unique_ptr<ShadowMap> m_shadowMap; //
+    std::unique_ptr<Texture> m_playerTexture;//
 
     Camera m_camera;
     Move m_move;
     DirectX::XMFLOAT3 m_playerPos; // プレイヤー（立方体）の現在位置
+
+    bool m_isWideCamera;
 
 };

@@ -180,3 +180,43 @@ bool Mesh::CreateSphere(ID3D11Device* device, float radius, UINT sliceCount, UIN
 
     return true;
 }
+
+
+bool Mesh::CreateQuad(ID3D11Device* device)
+{
+    std::vector<Vertex> vertices;
+    std::vector<WORD> indices;
+
+    // 2Dスプライト用なので、足元(Y=0)を原点とし、上に伸びる板を作ります
+    // 法線は手前(-Z方向)を向かせます
+    vertices = {
+        // Pos(位置), Normal(法線), TexCoord(UV), Tangent(接線)
+        { {-0.5f, 1.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}, {1.0f, 0.0f, 0.0f} }, // 左上 (0)
+        { { 0.5f, 1.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f}, {1.0f, 0.0f, 0.0f} }, // 右上 (1)
+        { {-0.5f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 1.0f}, {1.0f, 0.0f, 0.0f} }, // 左下 (2)
+        { { 0.5f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {1.0f, 1.0f}, {1.0f, 0.0f, 0.0f} }  // 右下 (3)
+    };
+
+    indices = { 0, 1, 2, 2, 1, 3 }; // 三角形2枚で四角形を作る
+    m_indexCount = static_cast<UINT>(indices.size());
+
+    // 頂点バッファの作成
+    D3D11_BUFFER_DESC vbd = {};
+    vbd.Usage = D3D11_USAGE_IMMUTABLE;
+    vbd.ByteWidth = sizeof(Vertex) * static_cast<UINT>(vertices.size());
+    vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    D3D11_SUBRESOURCE_DATA vinitData = {};
+    vinitData.pSysMem = vertices.data();
+    if (FAILED(device->CreateBuffer(&vbd, &vinitData, &m_vertexBuffer))) return false;
+
+    // インデックスバッファの作成
+    D3D11_BUFFER_DESC ibd = {};
+    ibd.Usage = D3D11_USAGE_IMMUTABLE;
+    ibd.ByteWidth = sizeof(WORD) * m_indexCount;
+    ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    D3D11_SUBRESOURCE_DATA iinitData = {};
+    iinitData.pSysMem = indices.data();
+    if (FAILED(device->CreateBuffer(&ibd, &iinitData, &m_indexBuffer))) return false;
+
+    return true;
+}
