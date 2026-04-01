@@ -19,7 +19,7 @@ bool Application::Initialize(HINSTANCE hInstance, int nCmdShow, int width, int h
     RECT wr = { 0, 0, width, height };
     AdjustWindowRect(&wr, WS_OVERLAPPEDWINDOW, FALSE);
 
-    m_hwnd = CreateWindowEx(0, CLASS_NAME, L"LightVroom(DX11)", WS_OVERLAPPEDWINDOW,
+    m_hwnd = CreateWindowEx(0, CLASS_NAME, L"2.5D(DX11)", WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT, wr.right - wr.left, wr.bottom - wr.top, nullptr, nullptr, hInstance, nullptr);
     if (m_hwnd == nullptr) return false;
 
@@ -244,13 +244,14 @@ void Application::Run()
             DrawScene(false);
 
             // ‘¾—z
-
+            /*
             CBPerObject sunObj;
             sunObj.worldMatrix = XMMatrixTranspose(XMMatrixTranslationFromVector(sunPos));
             m_shaderManager->UpdatePerObject(m_graphics->GetContext(), sunObj);
             CBPerMaterial sunMat = { XMFLOAT4(1.0f, 1.0f, 0.8f, 1.0f), 0.0f, 0.0f, 10.0f, 0.0f };
             m_shaderManager->UpdatePerMaterial(m_graphics->GetContext(), sunMat);
             m_sphereMesh->Draw(m_graphics->GetContext());
+            */
 
             // ŒŽ
             CBPerObject moonObj;
