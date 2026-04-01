@@ -23,7 +23,7 @@ public:
     bool CreateCube(ID3D11Device* device);
     //球体を生成する関数
     bool CreateSphere(ID3D11Device* device, float radius, UINT sliceCount, UINT stackCount);
-
+	//平面を生成する関数
     bool CreateQuad(ID3D11Device* device);
 
     // 描画（Drawコール）を行う関数

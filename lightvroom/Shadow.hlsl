@@ -23,7 +23,7 @@ cbuffer cbPerObject : register(b1)
     matrix worldMatrix;
 }
 
-// ★追加：影のパスでも材質情報と画像を受け取る
+// ：影のパスでも材質情報と画像を受け取る
 cbuffer cbPerMaterial : register(b2)
 {
     float4 materialAlbedo;
@@ -44,7 +44,7 @@ struct VS_INPUT
     float3 Tangent : TANGENT;
 };
 
-// ★変更：UV座標もPSに送るようにする
+//UV座標もPSに送るようにする
 struct PS_INPUT
 {
     float4 Pos : SV_POSITION;

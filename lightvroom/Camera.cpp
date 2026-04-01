@@ -33,7 +33,7 @@ void Camera::MoveRight(float d)
 
 void Camera::MoveUp(float d)
 {
-    m_position.y += d; // ã‰ºˆÚ“®‚Íƒ[ƒ‹ƒh‚ÌY²‚ÉŒÅ’è‚·‚é•û‚ª‘€ì‚µ‚â‚·‚¢‚Å‚·
+    m_position.y += d; 
 }
 
 void Camera::Rotate(float pitch, float yaw)

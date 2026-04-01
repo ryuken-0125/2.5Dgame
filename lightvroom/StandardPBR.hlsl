@@ -87,7 +87,7 @@ PS_INPUT VSMain(VS_INPUT input)
 }
 
 // ==========================================
-// ★追加：PBRの光計算をまとめた関数
+// PBRの光計算をまとめた関数
 // ==========================================
 float3 CalculatePBR(float3 N, float3 V, float3 L, float3 albedo, float roughness, float metallic, float3 F0, float3 lightColor)
 {
@@ -112,7 +112,7 @@ float3 CalculatePBR(float3 N, float3 V, float3 L, float3 albedo, float roughness
 }
 
 // ==========================================
-// ★追加：影の計算をまとめた関数
+// 影の計算をまとめた関数
 // ==========================================
 float CalculateShadow(float4 lightSpacePos, float3 N, float3 L)
 {
@@ -159,7 +159,7 @@ float4 PSMain(PS_INPUT input) : SV_TARGET
         // 画像から色を吸い出す (t1 にセットされる予定)
         float4 texColor = txAlbedo.Sample(samLinear, input.TexCoord);
         
-        //透明度(Alpha)が0.1以下のピクセルは「描画せずに捨てる」！
+        //透明度(Alpha)が0.1以下のピクセルは「描画せずに捨てる」
         clip(texColor.a - 0.1f);
         
         // 画像の色とベースの色を掛け合わせる

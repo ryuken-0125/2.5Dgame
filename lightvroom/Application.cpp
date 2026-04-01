@@ -124,16 +124,20 @@ void Application::Run()
             XMFLOAT4 currentSkyColor;
             XMFLOAT3 currentSunColor;
 
-            /* === 太陽の光と空の変化をコメントアウト ===
+            /* 
+            太陽の光と空の変化をコメントアウト 
+
             float sunIntensity = max(0.0f, sinf(angle));
-            if (sunIntensity > 0.0f) {
+            if (sunIntensity > 0.0f) 
+            {
                 currentSkyColor = XMFLOAT4(0.2f, 0.4f, 0.8f, 1.0f);
                 currentSunColor = XMFLOAT3(5.0f * sunIntensity, 4.5f * sunIntensity, 4.0f * sunIntensity);
-            } else {
+            } else
+            {
                 currentSkyColor = XMFLOAT4(0.02f, 0.02f, 0.1f, 1.0f);
                 currentSunColor = XMFLOAT3(0.0f, 0.0f, 0.0f);
             }
-            ========================================== */
+            */
 
             // 常に「夜」の状態に固定する
             currentSkyColor = XMFLOAT4(0.1f, 0.1f, 0.4f, 1.0f); // 漆黒に近い、わずかに青い闇
@@ -181,12 +185,13 @@ void Application::Run()
 
 
             // ==========================================
-            // --- 描画関数 ---
+            // 描画関数
             // ==========================================
             auto DrawScene = [&](bool isShadowPass) {
                 // 1. 地面
                 CBPerObject floorObj;
-                // ※移動範囲を広げるため、地面のサイズを 15->40 に拡大しておきます
+
+				// 地面のサイズを40に設定、高さを0.1にして、少し下に移動させる（地面がy=0の位置に来るように）
                 floorObj.worldMatrix = XMMatrixTranspose(XMMatrixScaling(40.0f, 0.1f, 40.0f) * XMMatrixTranslation(0.0f, -0.1f, 0.0f));
                 m_shaderManager->UpdatePerObject(m_graphics->GetContext(), floorObj);
 
@@ -243,8 +248,8 @@ void Application::Run()
             // 地上の物体を描画
             DrawScene(false);
 
-            // 太陽
             /*
+            太陽
             CBPerObject sunObj;
             sunObj.worldMatrix = XMMatrixTranspose(XMMatrixTranslationFromVector(sunPos));
             m_shaderManager->UpdatePerObject(m_graphics->GetContext(), sunObj);

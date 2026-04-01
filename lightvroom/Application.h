@@ -40,8 +40,8 @@ private:
     std::unique_ptr<Mesh> m_floorMesh; //地面用
     std::unique_ptr<Mesh> m_quadMesh;//2Dplayer用
 
-    std::unique_ptr<ShadowMap> m_shadowMap; //
-    std::unique_ptr<Texture> m_playerTexture;//
+	std::unique_ptr<ShadowMap> m_shadowMap; //シャドウマップ用クラスのインスタンスを保持する変数
+	std::unique_ptr<Texture> m_playerTexture;//2Dplayer用テクスチャ
 
     Camera m_camera;
     Move m_move;

@@ -6,7 +6,7 @@ Mesh::~Mesh() {}
 bool Mesh::CreateCube(ID3D11Device* device)
 {
     // 1. 立方体の頂点データ (位置, 法線, UV, 接ベクトル)
-    // 面ごとに法線が違うため、角を共有せずに面ごとに頂点を独立させます
+    // 面ごとに法線が違うため、角を共有せずに面ごとに頂点を独立
     std::vector<Vertex> vertices = {
         // 前面 (Z = -1)
         { {-1.0f, -1.0f, -1.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 1.0f}, {1.0f, 0.0f, 0.0f} },
@@ -187,8 +187,8 @@ bool Mesh::CreateQuad(ID3D11Device* device)
     std::vector<Vertex> vertices;
     std::vector<WORD> indices;
 
-    // 2Dスプライト用なので、足元(Y=0)を原点とし、上に伸びる板を作ります
-    // 法線は手前(-Z方向)を向かせます
+    // 2Dスプライト用なので、足元(Y=0)を原点とし、上に伸びる板を作る
+	// 法線は手前(-Z方向)を向かせるため、UVは左上が(0,0)、右下が(1,1)になるようにする
     vertices = {
         // Pos(位置), Normal(法線), TexCoord(UV), Tangent(接線)
         { {-0.5f, 1.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}, {1.0f, 0.0f, 0.0f} }, // 左上 (0)

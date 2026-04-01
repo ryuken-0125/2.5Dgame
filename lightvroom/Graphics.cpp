@@ -55,7 +55,7 @@ bool Graphics::Initialize(HWND hwnd, int width, int height)
     hr = m_device->CreateDepthStencilView(depthStencilBuffer.Get(), nullptr, &m_depthStencilView);
     if (FAILED(hr)) return false;
 
-    // ★修正：m_viewportに保存するように変更
+    //m_viewportに保存するように変更
     m_viewport = {};
     m_viewport.Width = (FLOAT)width;
     m_viewport.Height = (FLOAT)height;
@@ -64,7 +64,7 @@ bool Graphics::Initialize(HWND hwnd, int width, int height)
     m_viewport.TopLeftX = 0;
     m_viewport.TopLeftY = 0;
 
-    SetMainRenderTarget(); // ★追加：初期化時にメイン画面をセット
+    SetMainRenderTarget(); //初期化時にメイン画面をセット
 
     return true;
 }
