@@ -7,7 +7,7 @@
 #include <crtdbg.h>
 
 
-
+//りゅうけんです
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
     //終了時にメモリの解放忘れ（リーク）がないかを出力ウィンドウに表示する設定
