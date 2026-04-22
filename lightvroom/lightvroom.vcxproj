@@ -130,10 +130,12 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Move.cpp" />
+    <ClCompile Include="result.cpp" />
     <ClCompile Include="scene_manager.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="ShadowMap.cpp" />
     <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="title.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PBR_Math.hlsli" />
@@ -158,12 +160,14 @@
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Move.h" />
+    <ClInclude Include="result.h" />
     <ClInclude Include="scene.h" />
     <ClInclude Include="scene_manager.h" />
     <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="ShadowMap.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="Texture.h" />
+    <ClInclude Include="title.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shadow.hlsl">
