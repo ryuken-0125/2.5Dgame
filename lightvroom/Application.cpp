@@ -1,5 +1,4 @@
 #include "Application.h"
-#include <DirectXMath.h>
 #include <chrono>
 
 Application::Application() : m_hwnd(nullptr), m_hInstance(nullptr) {}
@@ -8,7 +7,7 @@ Application::~Application() {}
 bool Application::Initialize(HINSTANCE hInstance, int nCmdShow, int width, int height)
 {
     m_hInstance = hInstance;
-    const wchar_t CLASS_NAME[] = L"WindowClass";
+    const char CLASS_NAME[] = "WindowClass";
     WNDCLASS wc = { };
     wc.lpfnWndProc = WindowProc;
     wc.hInstance = hInstance;
@@ -19,12 +18,13 @@ bool Application::Initialize(HINSTANCE hInstance, int nCmdShow, int width, int h
     RECT wr = { 0, 0, width, height };
     AdjustWindowRect(&wr, WS_OVERLAPPEDWINDOW, FALSE);
 
-    m_hwnd = CreateWindowEx(0, CLASS_NAME, L"2.5D(DX11)", WS_OVERLAPPEDWINDOW,
+    m_hwnd = CreateWindowEx(0, CLASS_NAME, "2.5D(DX11)", WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT, wr.right - wr.left, wr.bottom - wr.top, nullptr, nullptr, hInstance, nullptr);
     if (m_hwnd == nullptr) return false;
 
     ShowWindow(m_hwnd, nCmdShow);
 
+    // å„ã‚·ã‚¹ãƒ†ãƒ ã®åˆæœŸåŒ–ï¼ˆã“ã“ã¯å¤‰æ›´ãªã—ï¼‰
     m_graphics = std::make_unique<Graphics>();
     if (!m_graphics->Initialize(m_hwnd, width, height)) return false;
 
@@ -36,29 +36,34 @@ bool Application::Initialize(HINSTANCE hInstance, int nCmdShow, int width, int h
 
     m_cubeMesh = std::make_unique<Mesh>();
     m_cubeMesh->CreateCube(m_graphics->GetDevice());
-
     m_sphereMesh = std::make_unique<Mesh>();
     m_sphereMesh->CreateSphere(m_graphics->GetDevice(), 1.0f, 30, 30);
-
     m_floorMesh = std::make_unique<Mesh>();
     m_floorMesh->CreateCube(m_graphics->GetDevice());
-
-    m_camera.SetPosition(0.0f, 2.0f, -8.0f);
-    m_camera.SetProjection(DirectX::XMConvertToRadians(45.0f), 1280.0f / 720.0f, 0.1f, 100.0f);
-
     m_quadMesh = std::make_unique<Mesh>();
-    m_quadMesh->CreateQuad(m_graphics->GetDevice()); // 2D—p”Â‚ğì¬
+    m_quadMesh->CreateQuad(m_graphics->GetDevice());
 
-    m_playerManager = std::make_unique<PlayerManager>();
-    if (!m_playerManager->Initialize(m_graphics->GetDevice())) return false;
+    m_playerTexture = std::make_unique<Texture>();
+    if (!m_playerTexture->Load(m_graphics->GetDevice(), "../asset/texture/player.png")) return false;
+    m_tilesetTexture = std::make_unique<Texture>();
+    if (!m_tilesetTexture->Load(m_graphics->GetDevice(), "../asset/texture/tileset.png")) return false;
 
-    m_isWideCamera = false; // Å‰‚Í•W€ƒJƒƒ‰
+    // GameContext ã®æ§‹ç¯‰
+    m_gameContext.graphics = m_graphics.get();
+    m_gameContext.shaderManager = m_shaderManager.get();
+    m_gameContext.quadMesh = m_quadMesh.get();
+    m_gameContext.cubeMesh = m_cubeMesh.get();
+    m_gameContext.floorMesh = m_floorMesh.get();
+    m_gameContext.sphereMesh = m_sphereMesh.get();
+    m_gameContext.shadowMap = m_shadowMap.get();
+    m_gameContext.playerTexture = m_playerTexture.get();
+    m_gameContext.tilesetTexture = m_tilesetTexture.get();
 
-    // •W€‚Ì‰æŠp(45“x)‚ğƒZƒbƒg
-    m_camera.SetFOV(DirectX::XMConvertToRadians(90.0f), 1280.0f / 720.0f, 0.1f, 100.0f);
+    // SceneManagerã®é–‹å§‹
+    m_sceneManager.Init(&m_gameContext);
+    m_sceneManager.ChangeScene(SceneType::FIELD);
 
     return true;
-
 }
 
 void Application::Run()
@@ -66,8 +71,6 @@ void Application::Run()
     MSG msg = { };
     auto startTime = std::chrono::high_resolution_clock::now();
     auto prevTime = startTime;
-
-    const float DAY_DURATION = 10.0f; // 1“ú‚Ì’·‚³i10•bj
 
     while (true)
     {
@@ -82,175 +85,10 @@ void Application::Run()
             auto currentTime = std::chrono::high_resolution_clock::now();
             float deltaTime = std::chrono::duration<float>(currentTime - prevTime).count();
             prevTime = currentTime;
-            float elapsedTime = std::chrono::duration<float>(currentTime - startTime).count();
 
-            // --- “ü—Í‚Ìˆ—‚ÆXV ---
-            m_playerManager->Update(deltaTime, m_camera);
-
-
-            //// 2. EƒL[‚ÅƒJƒƒ‰Ø‚è‘Ö‚¦
-            //if (m_move.CheckFovToggle())
-            //{
-            //    m_isWideCamera = !m_isWideCamera; // ó‘Ô‚ğ”½“]
-            //    float fov = m_isWideCamera ? 135.0f : 90.0f; // LŠp:135“x, •W€:90“x
-            //    m_camera.SetFOV(DirectX::XMConvertToRadians(fov), 1280.0f / 720.0f, 0.1f, 100.0f);
-            //}
-
-            // 3. ƒJƒƒ‰‚ğƒvƒŒƒCƒ„[‚É’Ç]‚³‚¹‚éiÎ‚ßã‚©‚çŒ©‰º‚ë‚·2.5D‚Ì’è”ÔƒAƒ“ƒOƒ‹j
-            DirectX::XMFLOAT3 cameraOffset(0.0f, 4.0f, -6.0f);
-
-            // --- 1“ú‚ÌƒTƒCƒNƒ‹ŒvZi¼‚©‚ç“Œ‚Öj ---
-            float dayTime = fmodf(elapsedTime / DAY_DURATION, 1.0f);
-            float angle = dayTime * DirectX::XM_2PI; // 0 ` 2PI
-
-            using namespace DirectX;
-
-            // ‘¾—z‚ÌˆÊ’u (XY•½–Êã‚Å‰~‚ğ•`‚­)
-            XMVECTOR sunPos = XMVectorSet(cosf(angle) * 25.0f, sinf(angle) * 25.0f, 0.0f, 0.0f);
-            XMVECTOR sunDir = XMVector3Normalize(-sunPos); // •¨‘Ì‚ÖŒü‚©‚¤•ûŒü
-
-            // Œ‚ÌˆÊ’u (‘¾—z‚Ì³”½‘Î)
-            XMVECTOR moonPos = -sunPos;
-            XMVECTOR moonDir = XMVector3Normalize(-moonPos);
-
-            // --- ŠÔ‘Ñ‚É‰‚¶‚½F‚Ìİ’è ---
-            XMFLOAT4 currentSkyColor;
-            XMFLOAT3 currentSunColor;
-
-            /* 
-            ‘¾—z‚ÌŒõ‚Æ‹ó‚Ì•Ï‰»‚ğƒRƒƒ“ƒgƒAƒEƒg 
-
-            float sunIntensity = max(0.0f, sinf(angle));
-            if (sunIntensity > 0.0f) 
-            {
-                currentSkyColor = XMFLOAT4(0.2f, 0.4f, 0.8f, 1.0f);
-                currentSunColor = XMFLOAT3(5.0f * sunIntensity, 4.5f * sunIntensity, 4.0f * sunIntensity);
-            } else
-            {
-                currentSkyColor = XMFLOAT4(0.02f, 0.02f, 0.1f, 1.0f);
-                currentSunColor = XMFLOAT3(0.0f, 0.0f, 0.0f);
-            }
-            */
-
-            // í‚Éu–év‚Ìó‘Ô‚ÉŒÅ’è‚·‚é
-            currentSkyColor = XMFLOAT4(0.1f, 0.1f, 0.4f, 1.0f); // ½•‚É‹ß‚¢A‚í‚¸‚©‚ÉÂ‚¢ˆÅ
-            currentSunColor = XMFLOAT3(0.0f, 0.0f, 0.0f);          // ‘¾—z‚ÌŒõ‚ÍŠ®‘S‚Éƒ[ƒ
-
-            float moonIntensity = max(0.0f, sinf(angle + DirectX::XM_PI));
-
-            // Œ‚ÌŒõ
-            XMFLOAT3 currentMoonColor = XMFLOAT3(0.7f * moonIntensity, 0.8f * moonIntensity, 1.2f * moonIntensity);
-
-            // ==========================================
-            //’è”ƒoƒbƒtƒ@‚Ì€”õ
-            // ==========================================
-            CBPerFrame frameData = {};
-            frameData.viewProjection = XMMatrixTranspose(m_camera.GetViewMatrix() * m_camera.GetProjectionMatrix());
-            frameData.cameraPos = m_camera.GetPosition();
-
-            // ‘¾—z‚ÌŒõ‚Ì‹­‚³‚ª 0 ‚æ‚è‘å‚«‚¢i’‹j‚È‚ç‘¾—z‚ÌŒü‚«A‚»‚¤‚Å‚È‚¢i–éj‚È‚çŒ‚ÌŒü‚«‚ğg‚¤
-            //‰e—pƒJƒƒ‰‚Ì‘¾—zEŒØ‚è‘Ö‚¦‚ğƒRƒƒ“ƒgƒAƒEƒg
-            //XMVECTOR activeLightDir = (sunIntensity > 0.0f) ? sunDir : moonDir;
-
-            // ‰e‚ÌƒJƒƒ‰iŒõŒ¹j‚Íí‚ÉuŒv‚ÉŒÅ’è‚·‚é
-            XMVECTOR activeLightDir = moonDir;
-
-            // ========================================================
-            // ‰e—p‚ÌƒJƒƒ‰‚ğAƒvƒŒƒCƒ„[‚É’Ç]‚·‚é‚æ‚¤‚É•ÏX
-            // ========================================================
-            //XMVECTOR playerVec = XMLoadFloat3(&m_playerPos);
-            DirectX::XMFLOAT3 pos = m_playerManager->GetPosition();
-            XMVECTOR playerVec = XMLoadFloat3(&pos);
-            // ƒvƒŒƒCƒ„[‚ÌˆÊ’u‚©‚çAŒõ‚Ì·‚·•ûŒü‚Æ‹tiã‹ój‚ÖƒJƒƒ‰‚ğˆÚ“®‚³‚¹‚é
-            XMVECTOR lightPosForShadow = playerVec + activeLightDir * -30.0f;
-
-            // í‚ÉƒvƒŒƒCƒ„[(playerVec)‚ğŒ©‚Â‚ß‚é‚æ‚¤‚É‚·‚é
-            XMMATRIX lightView = XMMatrixLookAtLH(lightPosForShadow, playerVec, XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f));
-
-            // ”O‚Ì‚½‚ß‰e‚Ì•`‰æ”ÍˆÍ‚ğ 30 ‚©‚ç 40 ‚ÉL‚°‚Ä‚¨‚­
-            XMMATRIX lightProj = XMMatrixOrthographicLH(40.0f, 40.0f, 0.1f, 100.0f);
-            frameData.lightViewProjection = XMMatrixTranspose(lightView * lightProj);
-            // ========================================================
-
-            XMStoreFloat3(&frameData.sunDir, sunDir);
-            frameData.sunColor = currentSunColor;
-            XMStoreFloat3(&frameData.moonDir, moonDir);
-            frameData.moonColor = currentMoonColor;
-            frameData.skyColor = currentSkyColor;
-
-
-
-
-
-            // ==========================================
-            // •`‰æŠÖ”
-            // ==========================================
-            auto DrawScene = [&](bool isShadowPass) {
-                // 1. ’n–Ê
-                CBPerObject floorObj;
-
-				// ’n–Ê‚ÌƒTƒCƒY‚ğ40‚Éİ’èA‚‚³‚ğ0.1‚É‚µ‚ÄA­‚µ‰º‚ÉˆÚ“®‚³‚¹‚éi’n–Ê‚ªy=0‚ÌˆÊ’u‚É—ˆ‚é‚æ‚¤‚Éj
-                floorObj.worldMatrix = XMMatrixTranspose(XMMatrixScaling(40.0f, 0.1f, 40.0f) * XMMatrixTranslation(0.0f, -0.1f, 0.0f));
-                m_shaderManager->UpdatePerObject(m_graphics->GetContext(), floorObj);
-
-                //if (!isShadowPass) ‚ğíœI‰e‚ÌƒpƒX‚Å‚àŞ¿‚ğXV‚·‚é
-                CBPerMaterial floorMat = { XMFLOAT4(0.3f, 0.5f, 0.3f, 1.0f), 0.8f, 0.0f, 0.0f, 0.0f }; // useTexture = 0.0
-                m_shaderManager->UpdatePerMaterial(m_graphics->GetContext(), floorMat);
-
-                m_floorMesh->Draw(m_graphics->GetContext());
-
-                // 2. ƒvƒŒƒCƒ„[(2D‚Ì”Â)
-                m_playerManager->Draw(m_graphics->GetContext(), m_shaderManager.get(), m_quadMesh.get(), isShadowPass);
-
-                // 3. “S‚Ì‹…‘Ì
-                CBPerObject sphereObj;
-                sphereObj.worldMatrix = XMMatrixTranspose(XMMatrixTranslation(2.0f, 1.0f, 2.0f));
-                m_shaderManager->UpdatePerObject(m_graphics->GetContext(), sphereObj);
-
-                //if (!isShadowPass) ‚ğíœI
-                CBPerMaterial sphereMat = { XMFLOAT4(0.56f, 0.57f, 0.58f, 1.0f), 0.1f, 1.0f, 0.0f, 0.0f }; // useTexture = 0.0
-                m_shaderManager->UpdatePerMaterial(m_graphics->GetContext(), sphereMat);
-
-                m_sphereMesh->Draw(m_graphics->GetContext());
-                };
-
-            // ƒpƒX1FƒVƒƒƒhƒEƒ}ƒbƒv¶¬
-            m_shadowMap->Bind(m_graphics->GetContext());
-            //ƒvƒŒƒCƒ„[‚Ì‰æ‘œ‚ğ‰e‚ÌƒpƒX‚É‚à“n‚·
-            m_shaderManager->BindShadowPass(m_graphics->GetContext(), m_playerManager->GetTextureSRV());
-            m_shaderManager->UpdatePerFrame(m_graphics->GetContext(), frameData);
-            DrawScene(true);
-
-            // ƒpƒX2FƒƒCƒ“•`‰æ
-            m_graphics->SetMainRenderTarget();
-            m_graphics->Clear(currentSkyColor.x, currentSkyColor.y, currentSkyColor.z, 1.0f);
-            m_shaderManager->BindMainPass(m_graphics->GetContext(), m_shadowMap->GetSRV());
-
-            // ’nã‚Ì•¨‘Ì‚ğ•`‰æ
-            DrawScene(false);
-
-            /*
-            ‘¾—z
-            CBPerObject sunObj;
-            sunObj.worldMatrix = XMMatrixTranspose(XMMatrixTranslationFromVector(sunPos));
-            m_shaderManager->UpdatePerObject(m_graphics->GetContext(), sunObj);
-            CBPerMaterial sunMat = { XMFLOAT4(1.0f, 1.0f, 0.8f, 1.0f), 0.0f, 0.0f, 10.0f, 0.0f };
-            m_shaderManager->UpdatePerMaterial(m_graphics->GetContext(), sunMat);
-            m_sphereMesh->Draw(m_graphics->GetContext());
-            */
-
-            // Œ
-            CBPerObject moonObj;
-            moonObj.worldMatrix = XMMatrixTranspose(XMMatrixScaling(0.6f, 0.6f, 0.6f) * XMMatrixTranslationFromVector(moonPos));
-            m_shaderManager->UpdatePerObject(m_graphics->GetContext(), moonObj);
-            CBPerMaterial moonMat = { XMFLOAT4(0.8f, 0.8f, 1.0f, 1.0f), 0.0f, 0.0f, 3.0f, 0.0f };
-            m_shaderManager->UpdatePerMaterial(m_graphics->GetContext(), moonMat);
-            m_sphereMesh->Draw(m_graphics->GetContext());
-
-            // Œãˆ—
-            ID3D11ShaderResourceView* nullSRV = nullptr;
-            m_graphics->GetContext()->PSSetShaderResources(0, 1, &nullSRV);
-            m_graphics->Present();
+            // --- å‡¦ç†ã‚’ã™ã¹ã¦SceneManagerã¸å§”è­² ---
+            m_sceneManager.Update(deltaTime);
+            m_sceneManager.Draw();
         }
     }
 }
