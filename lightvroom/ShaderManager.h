@@ -20,6 +20,11 @@ struct CBPerFrame
     // 月
     DirectX::XMFLOAT3 moonDir;      float pad6;
     DirectX::XMFLOAT3 moonColor;    float pad7;
+
+    DirectX::XMFLOAT3 spotPos;      float spotRange;    
+    DirectX::XMFLOAT3 spotDir;      float spotCosInner; 
+    DirectX::XMFLOAT3 spotColor;    float spotCosOuter; 
+
     // 空の色
     DirectX::XMFLOAT4 skyColor;
 };
