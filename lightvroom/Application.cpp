@@ -49,18 +49,13 @@ bool Application::Initialize(HINSTANCE hInstance, int nCmdShow, int width, int h
     m_quadMesh = std::make_unique<Mesh>();
     m_quadMesh->CreateQuad(m_graphics->GetDevice()); // 2D用板を作成
 
-    m_playerPos = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f); // 真ん中からスタート
+    m_playerManager = std::make_unique<PlayerManager>();
+    if (!m_playerManager->Initialize(m_graphics->GetDevice())) return false;
+
     m_isWideCamera = false; // 最初は標準カメラ
 
     // 標準の画角(45度)をセット
     m_camera.SetFOV(DirectX::XMConvertToRadians(90.0f), 1280.0f / 720.0f, 0.1f, 100.0f);
-
-    // テクスチャの読み込み（相対パスを指定）
-    m_playerTexture = std::make_unique<Texture>();
-    if (!m_playerTexture->Load(m_graphics->GetDevice(), "../asset/texture/player.png")) {
-        MessageBox(m_hwnd, L"player.png の読み込みに失敗しました！", L"エラー", MB_OK);
-        return false;
-    }
 
     return true;
 
@@ -90,21 +85,19 @@ void Application::Run()
             float elapsedTime = std::chrono::duration<float>(currentTime - startTime).count();
 
             // --- 入力の処理と更新 ---
-    
-            // 1. WASDでプレイヤーを動かす
-            m_move.ControlPlayer(m_playerPos, deltaTime);
+            m_playerManager->Update(deltaTime, m_camera);
 
-            // 2. Eキーでカメラ切り替え
-            if (m_move.CheckFovToggle())
-            {
-                m_isWideCamera = !m_isWideCamera; // 状態を反転
-                float fov = m_isWideCamera ? 135.0f : 90.0f; // 広角:135度, 標準:90度
-                m_camera.SetFOV(DirectX::XMConvertToRadians(fov), 1280.0f / 720.0f, 0.1f, 100.0f);
-            }
+
+            //// 2. Eキーでカメラ切り替え
+            //if (m_move.CheckFovToggle())
+            //{
+            //    m_isWideCamera = !m_isWideCamera; // 状態を反転
+            //    float fov = m_isWideCamera ? 135.0f : 90.0f; // 広角:135度, 標準:90度
+            //    m_camera.SetFOV(DirectX::XMConvertToRadians(fov), 1280.0f / 720.0f, 0.1f, 100.0f);
+            //}
 
             // 3. カメラをプレイヤーに追従させる（斜め上から見下ろす2.5Dの定番アングル）
             DirectX::XMFLOAT3 cameraOffset(0.0f, 4.0f, -6.0f);
-            m_camera.SetFollowTarget(m_playerPos, cameraOffset);
 
             // --- 1日のサイクル計算（西から東へ） ---
             float dayTime = fmodf(elapsedTime / DAY_DURATION, 1.0f);
@@ -165,7 +158,9 @@ void Application::Run()
             // ========================================================
             // 影用のカメラを、プレイヤーに追従するように変更
             // ========================================================
-            XMVECTOR playerVec = XMLoadFloat3(&m_playerPos);
+            //XMVECTOR playerVec = XMLoadFloat3(&m_playerPos);
+            DirectX::XMFLOAT3 pos = m_playerManager->GetPosition();
+            XMVECTOR playerVec = XMLoadFloat3(&pos);
             // プレイヤーの位置から、光の差す方向と逆（上空）へカメラを移動させる
             XMVECTOR lightPosForShadow = playerVec + activeLightDir * -30.0f;
 
@@ -182,6 +177,9 @@ void Application::Run()
             XMStoreFloat3(&frameData.moonDir, moonDir);
             frameData.moonColor = currentMoonColor;
             frameData.skyColor = currentSkyColor;
+
+
+
 
 
             // ==========================================
@@ -202,24 +200,7 @@ void Application::Run()
                 m_floorMesh->Draw(m_graphics->GetContext());
 
                 // 2. プレイヤー(2Dの板)
-                CBPerObject playerObj;
-                DirectX::XMMATRIX scale = DirectX::XMMatrixScaling(1.5f, 1.5f, 1.5f);
-                DirectX::XMMATRIX rot = DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(30.0f));
-                DirectX::XMMATRIX trans = DirectX::XMMatrixTranslation(m_playerPos.x, m_playerPos.y, m_playerPos.z);
-                playerObj.worldMatrix = XMMatrixTranspose(scale * rot * trans);
-                m_shaderManager->UpdatePerObject(m_graphics->GetContext(), playerObj);
-
-                //if (!isShadowPass) を削除！
-                CBPerMaterial playerMat = { XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.9f, 0.0f, 0.0f, 1.0f }; // useTexture = 1.0
-                m_shaderManager->UpdatePerMaterial(m_graphics->GetContext(), playerMat);
-
-                ID3D11ShaderResourceView* pSRV = m_playerTexture->GetSRV();
-                if (!isShadowPass) m_graphics->GetContext()->PSSetShaderResources(1, 1, &pSRV);
-
-                m_quadMesh->Draw(m_graphics->GetContext());
-
-                ID3D11ShaderResourceView* nullSRV = nullptr;
-                if (!isShadowPass) m_graphics->GetContext()->PSSetShaderResources(1, 1, &nullSRV);
+                m_playerManager->Draw(m_graphics->GetContext(), m_shaderManager.get(), m_quadMesh.get(), isShadowPass);
 
                 // 3. 鉄の球体
                 CBPerObject sphereObj;
@@ -236,7 +217,7 @@ void Application::Run()
             // パス1：シャドウマップ生成
             m_shadowMap->Bind(m_graphics->GetContext());
             //プレイヤーの画像を影のパスにも渡す
-            m_shaderManager->BindShadowPass(m_graphics->GetContext(), m_playerTexture->GetSRV());
+            m_shaderManager->BindShadowPass(m_graphics->GetContext(), m_playerManager->GetTextureSRV());
             m_shaderManager->UpdatePerFrame(m_graphics->GetContext(), frameData);
             DrawScene(true);
 

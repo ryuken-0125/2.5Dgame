@@ -9,7 +9,7 @@
 #include "Move.h"
 #include "ShadowMap.h"
 #include "Texture.h"
-
+#include "PlayerManager.h"
 
 class Application
 {
@@ -41,11 +41,12 @@ private:
     std::unique_ptr<Mesh> m_quadMesh;//2Dplayer用
 
 	std::unique_ptr<ShadowMap> m_shadowMap; //シャドウマップ用クラスのインスタンスを保持する変数
-	std::unique_ptr<Texture> m_playerTexture;//2Dplayer用テクスチャ
+	//std::unique_ptr<Texture> m_playerTexture;//2Dplayer用テクスチャ
 
     Camera m_camera;
-    Move m_move;
-    DirectX::XMFLOAT3 m_playerPos; // プレイヤー（立方体）の現在位置
+    //Move m_move;
+    //DirectX::XMFLOAT3 m_playerPos; // プレイヤー（立方体）の現在位置
+    std::unique_ptr<PlayerManager> m_playerManager;
 
     bool m_isWideCamera;
 
