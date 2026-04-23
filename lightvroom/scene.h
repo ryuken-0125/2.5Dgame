@@ -3,14 +3,14 @@
 
 class SceneManager;
 
-// シーンの基底クラス
+// 繧ｷ繝ｼ繝ｳ縺ｮ蝓ｺ蠎輔け繝ｩ繧ｹ
 class Scene
 {
 protected:
-    SceneManager& sceneManager; // シーンからマネージャにアクセス
+    SceneManager& m_sceneManager; // 繧ｷ繝ｼ繝ｳ縺九ｉ繝槭ロ繝ｼ繧ｸ繝｣縺ｫ繧｢繧ｯ繧ｻ繧ｹ
 
 public:
-    Scene(SceneManager& sm) : sceneManager(sm) {}
+    Scene(SceneManager& sm) : m_sceneManager(sm) {}
     virtual ~Scene() = default;
 
     virtual void Initialize() {}

@@ -1,85 +1,84 @@
 #include "scene_manager.h"
+#include "game_context.h"
+#include "field_scene.h"
+#include "sub_scene.h"
 
 //--------------------------------------
-// シーン生成（SceneManagerを渡す）
+// Init
 //--------------------------------------
-std::unique_ptr<Scene> CreateScene(SceneType type, SceneManager& sm)
+void SceneManager::Init(GameContext* ctx)
+{
+    m_ctx = ctx;
+}
+
+//--------------------------------------
+// Scene factory
+//--------------------------------------
+static std::unique_ptr<Scene> CreateScene(SceneType type, SceneManager& sm, GameContext* ctx)
 {
     switch (type)
     {
-    //case SceneType::TITLE:  return std::make_unique<Title>(sm);
-    //case SceneType::GAME:   return std::make_unique<Game>(sm);
-    //case SceneType::RESULT: return std::make_unique<Result>(sm);
+    case SceneType::FIELD:       return std::make_unique<FieldScene>(sm, *ctx);
+    case SceneType::SUB_SCENE_0: return std::make_unique<SubScene>(sm, *ctx, 0);
+    case SceneType::SUB_SCENE_1: return std::make_unique<SubScene>(sm, *ctx, 1);
+    case SceneType::SUB_SCENE_2: return std::make_unique<SubScene>(sm, *ctx, 2);
+    case SceneType::SUB_SCENE_3: return std::make_unique<SubScene>(sm, *ctx, 3);
+    default: return nullptr;
     }
-    return nullptr;
 }
 
 //--------------------------------------
-// シーン切り替え要求
+// ChangeScene
 //--------------------------------------
 void SceneManager::ChangeScene(SceneType type)
 {
-    nextSceneType = type;
-    isChanging = true;
+    m_nextType    = type;
+    m_isChanging  = true;
 }
 
 //--------------------------------------
-// 更新処理
+// ChangeToSubScene  (index 0-3)
+//--------------------------------------
+void SceneManager::ChangeToSubScene(int index)
+{
+    int clamped = (index < 0) ? 0 : (index > 3) ? 3 : index;
+    SceneType types[] = {
+        SceneType::SUB_SCENE_0,
+        SceneType::SUB_SCENE_1,
+        SceneType::SUB_SCENE_2,
+        SceneType::SUB_SCENE_3
+    };
+    ChangeScene(types[clamped]);
+}
+
+//--------------------------------------
+// Update
 //--------------------------------------
 void SceneManager::Update(double deltaTime)
 {
-    // 安全なタイミングで切り替え
-    if (isChanging)
+    if (m_isChanging)
     {
-        if (currentScene)
-        {
-            currentScene->Finalize();
-        }
+        if (m_currentScene)
+            m_currentScene->Finalize();
 
-        currentScene = CreateScene(nextSceneType, *this);
+        m_currentScene = CreateScene(m_nextType, *this, m_ctx);
 
-        if (currentScene)
-        {
-            currentScene->Initialize();
-        }
+        if (m_currentScene)
+            m_currentScene->Initialize();
 
-        currentType = nextSceneType;
-        isChanging = false;
+        m_currentType = m_nextType;
+        m_isChanging  = false;
     }
 
-    if (currentScene)
-    {
-        currentScene->Update(deltaTime);
-    }
+    if (m_currentScene)
+        m_currentScene->Update(deltaTime);
 }
 
 //--------------------------------------
-// 描画処理
+// Draw
 //--------------------------------------
 void SceneManager::Draw()
 {
-    if (currentScene)
-    {
-        currentScene->Draw();
-    }
+    if (m_currentScene)
+        m_currentScene->Draw();
 }
-
-//使い方
-
-//#include "title.h"
-//#include "scene_manager.h"
-//
-//Title::Title(SceneManager& sm)
-//    : Scene(sm)
-//{
-//}
-//
-//void Title::Update(double dt)
-//{
-//    if (/* スタート押された */)
-//    {
-//        sceneManager.ChangeScene(SceneType::GAME);
-//    }
-//}
-
-//Cのグローバル状態じゃないから、クラスのインスタンスを...
