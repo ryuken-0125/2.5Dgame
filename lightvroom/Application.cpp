@@ -1,5 +1,7 @@
 #include "Application.h"
+#include <DirectXMath.h>
 #include <chrono>
+
 
 Application::Application() : m_hwnd(nullptr), m_hInstance(nullptr) {}
 Application::~Application() {}
@@ -24,7 +26,6 @@ bool Application::Initialize(HINSTANCE hInstance, int nCmdShow, int width, int h
 
     ShowWindow(m_hwnd, nCmdShow);
 
-    // 各システムの初期化（ここは変更なし）
     m_graphics = std::make_unique<Graphics>();
     if (!m_graphics->Initialize(m_hwnd, width, height)) return false;
 
@@ -36,19 +37,29 @@ bool Application::Initialize(HINSTANCE hInstance, int nCmdShow, int width, int h
 
     m_cubeMesh = std::make_unique<Mesh>();
     m_cubeMesh->CreateCube(m_graphics->GetDevice());
+
     m_sphereMesh = std::make_unique<Mesh>();
     m_sphereMesh->CreateSphere(m_graphics->GetDevice(), 1.0f, 30, 30);
+
     m_floorMesh = std::make_unique<Mesh>();
     m_floorMesh->CreateCube(m_graphics->GetDevice());
+
     m_quadMesh = std::make_unique<Mesh>();
-    m_quadMesh->CreateQuad(m_graphics->GetDevice());
+    m_quadMesh->CreateQuad(m_graphics->GetDevice()); // 2D Sprite
 
     m_playerTexture = std::make_unique<Texture>();
-    if (!m_playerTexture->Load(m_graphics->GetDevice(), "../asset/texture/player.png")) return false;
-    m_tilesetTexture = std::make_unique<Texture>();
-    if (!m_tilesetTexture->Load(m_graphics->GetDevice(), "../asset/texture/tileset.png")) return false;
+    if (!m_playerTexture->Load(m_graphics->GetDevice(), "../asset/texture/player.png")) {
+        MessageBox(m_hwnd, "player.png load failed!", "Error", MB_OK);
+        return false;
+    }
 
-    // GameContext の構築
+    m_tilesetTexture = std::make_unique<Texture>();
+    if (!m_tilesetTexture->Load(m_graphics->GetDevice(), "../asset/texture/tileset.png")) {
+        MessageBox(m_hwnd, "tileset.png load failed!", "Error", MB_OK);
+        return false;
+    }
+
+    // Set up GameContext
     m_gameContext.graphics = m_graphics.get();
     m_gameContext.shaderManager = m_shaderManager.get();
     m_gameContext.quadMesh = m_quadMesh.get();
@@ -59,11 +70,12 @@ bool Application::Initialize(HINSTANCE hInstance, int nCmdShow, int width, int h
     m_gameContext.playerTexture = m_playerTexture.get();
     m_gameContext.tilesetTexture = m_tilesetTexture.get();
 
-    // SceneManagerの開始
+    // Initialize SceneManager
     m_sceneManager.Init(&m_gameContext);
     m_sceneManager.ChangeScene(SceneType::FIELD);
 
     return true;
+
 }
 
 void Application::Run()
@@ -86,7 +98,7 @@ void Application::Run()
             float deltaTime = std::chrono::duration<float>(currentTime - prevTime).count();
             prevTime = currentTime;
 
-            // --- 処理をすべてSceneManagerへ委譲 ---
+            // Delegate to SceneManager
             m_sceneManager.Update(deltaTime);
             m_sceneManager.Draw();
         }
