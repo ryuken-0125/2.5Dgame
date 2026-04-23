@@ -119,7 +119,7 @@ void Application::Update(float deltaTime)
     // --- 2. ÉJÉÅÉâÇÃçXêV ---
     if (m_move.CheckFovToggle()) {
         m_isWideCamera = !m_isWideCamera;
-        float fov = m_isWideCamera ? 90.0f : 45.0f;
+        float fov = m_isWideCamera ? 135.0f : 90.0f;
         m_camera.SetFOV(DirectX::XMConvertToRadians(fov), 1280.0f / 720.0f, 0.1f, 100.0f);
     }
     DirectX::XMFLOAT3 cameraOffset(0.0f, 4.0f, -6.0f);
