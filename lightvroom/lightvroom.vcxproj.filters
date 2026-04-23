@@ -45,6 +45,10 @@
     <ClCompile Include="Texture.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="PlayerManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerStatus.cpp">
     <ClCompile Include="scene_manager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -106,6 +110,10 @@
     <ClInclude Include="Texture.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="PlayerManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerStatus.h">
     <ClInclude Include="scene.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
