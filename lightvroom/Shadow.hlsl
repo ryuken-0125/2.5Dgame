@@ -4,20 +4,18 @@ cbuffer cbPerFrame : register(b0)
     matrix lightViewProjection;
     float3 cameraPos;
     float pad1;
-    float3 lightDir;
-    float pad2;
-    float3 lightColor;
-    float pad3;
-    float3 sunDir;
-    float pad4;
-    float3 sunColor;
-    float pad5;
-    float3 moonDir;
-    float pad6;
-    float3 moonColor;
-    float pad7;
+    
+    // 使わなくても、サイズ合わせのために定義だけは必須
+    float3 spotPos;
+    float spotRange;
+    float3 spotDir;
+    float spotCosInner;
+    float3 spotColor;
+    float spotCosOuter;
+    
     float4 skyColor;
 }
+
 cbuffer cbPerObject : register(b1)
 {
     matrix worldMatrix;

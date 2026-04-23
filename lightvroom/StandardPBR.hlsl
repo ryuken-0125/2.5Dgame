@@ -14,7 +14,6 @@ cbuffer cbPerFrame : register(b0)
     float pad2;
     float3 lightColor;
     float pad3;
-    
     float3 sunDir;
     float pad4;
     float3 sunColor;
@@ -23,6 +22,14 @@ cbuffer cbPerFrame : register(b0)
     float pad6;
     float3 moonColor;
     float pad7;
+    
+    // スポットライト用変数
+    float3 spotPos;
+    float spotRange;
+    float3 spotDir;
+    float spotCosInner;
+    float3 spotColor;
+    float spotCosOuter;
     
     float4 skyColor;
 }
@@ -41,10 +48,10 @@ cbuffer cbPerMaterial : register(b2)
     float useTexture;
 }
 
-Texture2D txShadowMap : register(t0); // 影の画像
-Texture2D txAlbedo : register(t1); //キャラクターの画像
-SamplerState samLinear : register(s0); // 画像用のサンプラー
-SamplerState samClamp : register(s1); // 影用のサンプラー
+Texture2D txShadowMap : register(t0);
+Texture2D txAlbedo : register(t1);
+SamplerState samLinear : register(s0);
+SamplerState samClamp : register(s1);
 
 // ==========================================
 // 構造体
@@ -69,7 +76,7 @@ struct PS_INPUT
 };
 
 // ==========================================
-// 頂点シェーダー
+// 1. 頂点シェーダー (消えていたものを復活！)
 // ==========================================
 PS_INPUT VSMain(VS_INPUT input)
 {
@@ -82,12 +89,14 @@ PS_INPUT VSMain(VS_INPUT input)
     output.Tangent = normalize(mul(input.Tangent, (float3x3) worldMatrix));
     output.Binormal = cross(output.Normal, output.Tangent);
     
+    // 影の計算用に、光源から見た座標も保存
     output.LightSpacePos = mul(worldPos, lightViewProjection);
+    
     return output;
 }
 
 // ==========================================
-// PBRの光計算をまとめた関数
+// 2. PBRの光計算関数
 // ==========================================
 float3 CalculatePBR(float3 N, float3 V, float3 L, float3 albedo, float roughness, float metallic, float3 F0, float3 lightColor)
 {
@@ -112,7 +121,26 @@ float3 CalculatePBR(float3 N, float3 V, float3 L, float3 albedo, float roughness
 }
 
 // ==========================================
-// 影の計算をまとめた関数
+// 3. スポットライト計算関数 (必ず CalculatePBR の下)
+// ==========================================
+float3 CalculateSpotLight(float3 N, float3 V, float3 worldPos, float3 albedo, float roughness, float metallic, float3 F0)
+{
+    float3 L = normalize(spotPos - worldPos);
+    float dist = length(spotPos - worldPos);
+    
+    float attenuation = saturate(1.0 - dist / spotRange);
+    
+    float theta = dot(L, normalize(-spotDir));
+    float epsilon = spotCosInner - spotCosOuter;
+    float intensity = saturate((theta - spotCosOuter) / epsilon);
+    
+    float3 lighting = CalculatePBR(N, V, L, albedo, roughness, metallic, F0, spotColor);
+    
+    return lighting * attenuation * intensity;
+}
+
+// ==========================================
+// 4. 影の計算関数
 // ==========================================
 float CalculateShadow(float4 lightSpacePos, float3 N, float3 L)
 {
@@ -122,7 +150,6 @@ float CalculateShadow(float4 lightSpacePos, float3 N, float3 L)
 
     float shadow = 1.0f;
     
-    // カメラの範囲内でのみ影を落とす
     if (projCoords.x >= 0.0f && projCoords.x <= 1.0f &&
         projCoords.y >= 0.0f && projCoords.y <= 1.0f &&
         projCoords.z >= 0.0f && projCoords.z <= 1.0f)
@@ -131,7 +158,6 @@ float CalculateShadow(float4 lightSpacePos, float3 N, float3 L)
         float bias = max(0.005f * (1.0f - dot(N, L)), 0.0005f);
         float2 texelSize = 1.0f / 2048.0f;
         
-        // 3x3 PCF (影の縁を滑らかにぼかす)
         [unroll]
         for (int x = -1; x <= 1; ++x)
         {
@@ -147,66 +173,53 @@ float CalculateShadow(float4 lightSpacePos, float3 N, float3 L)
 }
 
 // ==========================================
-// ピクセルシェーダー
+// 5. ピクセルシェーダー (一番下)
 // ==========================================
 float4 PSMain(PS_INPUT input) : SV_TARGET
 {
     float3 albedo = materialAlbedo.rgb;
     
-    //画像を使う場合の処理
+    // 画像の透明部分の切り抜き
     if (useTexture > 0.5f)
     {
-        // 画像から色を吸い出す (t1 にセットされる予定)
         float4 texColor = txAlbedo.Sample(samLinear, input.TexCoord);
-        
-        //透明度(Alpha)が0.1以下のピクセルは「描画せずに捨てる」
         clip(texColor.a - 0.1f);
-        
-        // 画像の色とベースの色を掛け合わせる
         albedo *= texColor.rgb;
     }
-    
+
     float roughness = materialRoughness;
     float metallic = materialMetallic;
     float emissive = materialEmissive;
 
-    // 1. 太陽・月自体を描画する場合（光の計算を無視してそのまま光る）
+    // 自ら光る物体（上位存在の目や月）はそのまま明るく描画
     if (emissive > 0.0f)
     {
         return float4(albedo * emissive, 1.0f);
     }
 
-// 2. 共通ベクトルの準備
     float3 N = normalize(input.Normal);
     float3 V = normalize(cameraPos - input.WorldPos);
-    float3 F0 = float3(0.04, 0.04, 0.04);
-    F0 = lerp(F0, albedo, metallic);
+    float3 F0 = lerp(float3(0.04f, 0.04f, 0.04f), albedo, metallic);
 
-    // ========================================================
-    //太陽のライティングと影
-    // ========================================================
-    float3 L_sun = normalize(-sunDir);
-    // any(sunColor) = 太陽が光っている時だけ CalculateShadow を実行する（重い処理のスキップ）
-    float sunShadow = any(sunColor) ? CalculateShadow(input.LightSpacePos, N, L_sun) : 1.0f;
-    float3 sunLighting = CalculatePBR(N, V, L_sun, albedo, roughness, metallic, F0, sunColor) * sunShadow;
+    // 1. 環境光 (光が当たっていない部分の基本の明るさ)
+    float3 ambient = albedo * skyColor.rgb * 0.5f;
 
-    // ========================================================
-    // 月のライティングと影
-    // ========================================================
-    float3 L_moon = normalize(-moonDir);
-    // 月が光っている時だけ影を計算し、月の光に掛け合わせる
-    float moonShadow = any(moonColor) ? CalculateShadow(input.LightSpacePos, N, L_moon) : 1.0f;
-    float3 moonLighting = CalculatePBR(N, V, L_moon, albedo, roughness, metallic, F0, moonColor) * moonShadow;
+    // 2. スポットライトの光の強さ
+    float3 spotLightColor = CalculateSpotLight(N, V, input.WorldPos, albedo, roughness, metallic, F0);
 
-    // 5. 環境光（空の色を反映）
-    float3 ambient = albedo * skyColor.rgb * 0.1f;
-
-    // 全ての光を合成
-    float3 finalColor = ambient + sunLighting + moonLighting;
+    // 3. 影の濃さ (CalculateShadowを使って綺麗にぼかす)
+    float3 L_spot = normalize(spotPos - input.WorldPos);
+    float shadow = CalculateShadow(input.LightSpacePos, N, L_spot);
     
-    // トーンマップとガンマ補正
+    // 完全に真っ黒になるのを防ぐ (0.1f)
+    shadow = max(shadow, 0.1f);
+
+    // 4. 最終的な色の合成 (環境光 ＋ スポットライト × 影)
+    float3 finalColor = ambient + (spotLightColor * shadow);
+    
+    // トーンマップとガンマ補正 (画面を綺麗に発色させる処理)
     finalColor = finalColor / (finalColor + float3(1.0, 1.0, 1.0));
     finalColor = pow(finalColor, float3(1.0 / 2.2, 1.0 / 2.2, 1.0 / 2.2));
 
-    return float4(finalColor, 1.0);
+    return float4(finalColor, 1.0f);
 }

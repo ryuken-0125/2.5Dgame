@@ -16,7 +16,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     Application app;
 
     // ウィンドウサイズを 1280x720 に指定して初期化
-    if (!app.Initialize(hInstance, nCmdShow, 1280, 720))
+    if (!app.Initialize(hInstance, nCmdShow, 1920, 1080))
     {
         return -1;
     }

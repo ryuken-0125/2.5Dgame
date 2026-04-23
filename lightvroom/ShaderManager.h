@@ -24,6 +24,11 @@ struct CBPerFrame
     DirectX::XMFLOAT3 moonDir;      float pad6; 
     DirectX::XMFLOAT3 moonColor;    float pad7; 
 
+    // スポットライト（視線）用
+    DirectX::XMFLOAT3 spotPos;      float spotRange;    // 光の届く距離
+    DirectX::XMFLOAT3 spotDir;      float spotCosInner; // 内側の角度（1.0に近づくほど鋭い）
+    DirectX::XMFLOAT3 spotColor;    float spotCosOuter; // 外側の角度（ぼかし用）
+
     // 空の色
     DirectX::XMFLOAT4 skyColor;  
 };
