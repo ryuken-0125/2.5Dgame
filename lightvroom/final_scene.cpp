@@ -1,8 +1,4 @@
-/*------------------------------
- * sub_scene.cpp - Action sub-scene (2D side-scrolling tilemap)
- *------------------------------*/
-
-#include "sub_scene.h"
+#include "final_scene.h"
 #include "scene_manager.h"
 #include <Windows.h>
 #include <cmath>
@@ -10,142 +6,74 @@
 using namespace DirectX;
 
 // ============================================================
-// Map data (0=empty,1=ground,2=platform,3=wall,4=exit,5=deco)
-// Row 0 = top, Row MAP_HEIGHT-1 = bottom
+// Final Stage Map
+// 0=empty,1=ground,2=platform,3=wall,4=exit,5=deco
 // ============================================================
-
-const int SubScene::MAP_DATA_0[TileMap::MAP_HEIGHT * TileMap::MAP_WIDTH] =
-{
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,2,2,0,0,0,0,0,2,2,2,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,2,2,2,0,0,0,0,2,2,0,0,0,0,2,2,2,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,
-    1,1,1,1,1,0,0,0,1,1,1,1,0,0,0,1,1,1,1,1,
-    3,3,3,3,3,0,0,0,3,3,3,3,0,0,0,3,3,3,3,3,
-    3,3,3,3,3,0,0,0,3,3,3,3,0,0,0,3,3,3,3,3,
-};
-
-const int SubScene::MAP_DATA_1[TileMap::MAP_HEIGHT * TileMap::MAP_WIDTH] =
+const int FinalScene::MAP_DATA[TileMap::MAP_HEIGHT * TileMap::MAP_WIDTH] =
 {
     3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,
     3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,
-    3,0,0,0,0,0,0,0,0,2,2,2,0,0,0,0,0,0,0,3,
-    3,0,0,2,2,0,0,0,0,0,0,0,0,0,0,2,2,0,0,3,
+    3,0,0,0,0,5,0,0,2,2,2,2,0,0,5,0,0,0,0,3,
+    3,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,3,
+    3,0,0,0,0,0,2,2,0,0,0,0,2,2,0,0,0,0,0,3,
+    3,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,3,
+    3,0,0,0,2,0,0,0,0,4,0,0,0,0,2,0,0,0,0,3,
     3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,
-    3,0,0,0,0,0,2,2,2,0,0,0,2,2,2,0,0,0,0,3,
-    3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,
-    3,0,4,0,1,1,1,0,0,1,1,1,1,0,0,1,1,1,0,3,
-    3,3,3,3,3,3,3,0,0,3,3,3,3,0,0,3,3,3,3,3,
-    3,3,3,3,3,3,3,0,0,3,3,3,3,0,0,3,3,3,3,3,
-};
-
-const int SubScene::MAP_DATA_2[TileMap::MAP_HEIGHT * TileMap::MAP_WIDTH] =
-{
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,2,2,2,0,0,0,0,0,0,0,
-    0,0,2,0,0,0,0,2,2,0,0,0,0,0,0,0,2,2,0,0,
-    0,0,0,0,0,2,0,0,0,0,0,0,0,2,2,0,0,0,0,0,
-    0,4,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,
-    2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,
-    0,0,0,2,2,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,2,2,2,0,0,0,0,0,2,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,
-};
-
-const int SubScene::MAP_DATA_3[TileMap::MAP_HEIGHT * TileMap::MAP_WIDTH] =
-{
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,3,0,0,0,0,0,0,3,0,0,0,0,0,0,
-    0,0,2,2,0,0,3,0,0,2,2,0,0,3,0,0,2,2,0,0,
-    0,0,0,0,0,0,3,0,0,0,0,0,0,3,0,0,0,0,0,0,
-    5,5,0,0,5,5,3,5,5,0,0,5,5,3,5,5,0,0,5,4,
-    1,1,1,1,1,1,3,1,1,1,1,1,1,3,1,1,1,1,1,1,
-    3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,
-    3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,
+    3,1,1,1,1,1,1,0,0,1,1,0,0,1,1,1,1,1,1,3,
     3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,
 };
 
 // ============================================================
 // Constructor
 // ============================================================
-SubScene::SubScene(SceneManager& sm, GameContext& ctx, int index)
+FinalScene::FinalScene(SceneManager& sm, GameContext& ctx)
     : Scene(sm)
     , m_ctx(ctx)
-    , m_index(index)
-    , m_playerPos(0.0f, 0.0f, 0.0f)
+    , m_playerPos(0.0f, 4.0f, 0.0f)
     , m_playerVel(0.0f, 0.0f, 0.0f)
     , m_onGround(false)
     , m_jumpSpaceWasDown(false)
+    , m_elapsedTime(0.0f)
 {
 }
 
 // ============================================================
 // Initialize
 // ============================================================
-void SubScene::Initialize()
+void FinalScene::Initialize()
 {
-    LoadMap();
-    SetupExitZone();
-
-    m_playerPos = m_tileMap.GetSpawnPosition();
-    m_playerVel = XMFLOAT3(0.0f, 0.0f, 0.0f);
-    m_onGround  = false;
+    m_playerVel        = XMFLOAT3(0.0f, 0.0f, 0.0f);
+    m_onGround         = false;
     m_jumpSpaceWasDown = false;
+    m_elapsedTime      = 0.0f;
 
-    m_camera.SetPosition(m_playerPos.x, m_playerPos.y + 5.0f, -18.0f);
-    m_camera.SetFOV(XMConvertToRadians(60.0f), 1280.0f / 720.0f, 0.1f, 200.0f);
-}
+    m_tileMap  = TileMap();
+    m_exitZones = WarpZoneManager();
 
-void SubScene::Finalize() {}
+    m_tileMap.LoadFromArray(MAP_DATA);
+    m_playerPos = m_tileMap.GetSpawnPosition();
 
-// ============================================================
-// LoadMap
-// ============================================================
-void SubScene::LoadMap()
-{
-    const int* data = nullptr;
-    switch (m_index)
-    {
-    case 0: data = MAP_DATA_0; break;
-    case 1: data = MAP_DATA_1; break;
-    case 2: data = MAP_DATA_2; break;
-    case 3: data = MAP_DATA_3; break;
-    default: data = MAP_DATA_0; break;
-    }
-    m_tileMap.LoadFromArray(data);
-}
-
-// ============================================================
-// SetupExitZone
-// ============================================================
-void SubScene::SetupExitZone()
-{
+    // Exit zone at TILE_EXIT position
     XMFLOAT3 exitPos = m_tileMap.GetExitWorldPos();
     float ts = m_tileMap.tileSize;
     AABB exitBounds = AABB::Make(
         XMFLOAT3(exitPos.x, exitPos.y + ts * 0.5f, 0.0f),
         XMFLOAT3(ts * 1.5f, ts * 2.0f, ts * 3.0f)
     );
-    m_exitZones.AddZone(exitBounds, -1, "Field", XMFLOAT4(0.9f, 0.9f, 0.1f, 0.7f));
+    m_exitZones.AddZone(exitBounds, -1, "Field", XMFLOAT4(1.0f, 0.85f, 0.1f, 0.9f));
+
+    m_camera.SetFOV(XMConvertToRadians(60.0f), 1280.0f / 720.0f, 0.1f, 200.0f);
 }
+
+void FinalScene::Finalize() {}
 
 // ============================================================
 // Update
 // ============================================================
-void SubScene::Update(double deltaTime)
+void FinalScene::Update(double deltaTime)
 {
     float dt = (float)deltaTime;
-
-    if (m_ctx.lightManager)
-    {
-        m_ctx.lightManager->Update(dt);
-        m_ctx.lightManager->UpdateShadowCamera(m_playerPos);
-    }
+    m_elapsedTime += dt;
 
     HandleInput(dt);
     UpdatePhysics(dt);
@@ -166,7 +94,7 @@ void SubScene::Update(double deltaTime)
 // ============================================================
 // HandleInput
 // ============================================================
-void SubScene::HandleInput(float dt)
+void FinalScene::HandleInput(float dt)
 {
     const float MOVE_SPEED = 8.0f;
     const float JUMP_SPEED = 15.0f;
@@ -197,7 +125,7 @@ void SubScene::HandleInput(float dt)
 // ============================================================
 // UpdatePhysics
 // ============================================================
-void SubScene::UpdatePhysics(float dt)
+void FinalScene::UpdatePhysics(float dt)
 {
     const float GRAVITY = -28.0f;
 
@@ -244,19 +172,19 @@ void SubScene::UpdatePhysics(float dt)
 
     if (m_playerVel.x < 0.0f && m_tileMap.IsSolid(leftX, midY))
     {
-        float localX   = leftX - m_tileMap.origin.x;
-        int col        = (int)floorf(localX / m_tileMap.tileSize);
+        float localX     = leftX - m_tileMap.origin.x;
+        int col          = (int)floorf(localX / m_tileMap.tileSize);
         float tileRightX = m_tileMap.origin.x + (col + 1) * m_tileMap.tileSize;
-        m_playerPos.x  = tileRightX + halfW;
-        m_playerVel.x  = 0.0f;
+        m_playerPos.x    = tileRightX + halfW;
+        m_playerVel.x    = 0.0f;
     }
     if (m_playerVel.x > 0.0f && m_tileMap.IsSolid(rightX, midY))
     {
-        float localX   = rightX - m_tileMap.origin.x;
-        int col        = (int)floorf(localX / m_tileMap.tileSize);
+        float localX    = rightX - m_tileMap.origin.x;
+        int col         = (int)floorf(localX / m_tileMap.tileSize);
         float tileLeftX = m_tileMap.origin.x + col * m_tileMap.tileSize;
-        m_playerPos.x  = tileLeftX - halfW;
-        m_playerVel.x  = 0.0f;
+        m_playerPos.x   = tileLeftX - halfW;
+        m_playerVel.x   = 0.0f;
     }
 
     float mapBottomY = m_tileMap.origin.y - m_tileMap.tileSize * 2.0f;
@@ -270,73 +198,52 @@ void SubScene::UpdatePhysics(float dt)
 // ============================================================
 // Draw
 // ============================================================
-void SubScene::Draw()
+void FinalScene::Draw()
 {
     auto* ctx = m_ctx.graphics->GetContext();
     auto* sm  = m_ctx.shaderManager;
 
+    // Dynamic spotlight that sweeps back and forth for dramatic effect
+    float sweepAngle = sinf(m_elapsedTime * 0.8f) * 12.0f;
+    XMVECTOR spotEye = XMVectorSet(0.0f, 20.0f, -20.0f, 1.0f);
+    XMVECTOR spotTarget = XMLoadFloat3(&m_playerPos);
+    XMVECTOR spotDir    = XMVector3Normalize(spotTarget - spotEye);
+
     CBPerFrame frameData = {};
-    if (m_ctx.lightManager)
-    {
-        frameData = m_ctx.lightManager->GetFrameData(
-            m_camera.GetViewMatrix() * m_camera.GetProjectionMatrix(),
-            m_camera.GetPosition()
-        );
-    }
-    else
-    {
-        frameData.viewProjection = XMMatrixTranspose(
-            m_camera.GetViewMatrix() * m_camera.GetProjectionMatrix()
-        );
-        frameData.cameraPos = m_camera.GetPosition();
-    }
+    frameData.viewProjection = XMMatrixTranspose(
+        m_camera.GetViewMatrix() * m_camera.GetProjectionMatrix()
+    );
+    frameData.cameraPos = m_camera.GetPosition();
+    XMStoreFloat3(&frameData.spotPos, spotEye);
+    frameData.spotRange    = 70.0f;
+    XMStoreFloat3(&frameData.spotDir, spotDir);
+    frameData.spotCosInner = cosf(XMConvertToRadians(12.0f));
+    frameData.spotCosOuter = cosf(XMConvertToRadians(22.0f));
 
-    XMVECTOR lightDir = XMVector3Normalize(XMVectorSet(0.3f, -1.0f, 0.5f, 0.0f));
-    XMStoreFloat3(&frameData.lightDir,  lightDir);
-    frameData.lightColor = XMFLOAT3(1.0f, 1.0f, 0.9f);
-    XMStoreFloat3(&frameData.sunDir,   lightDir);
-    frameData.sunColor   = XMFLOAT3(1.0f, 0.9f, 0.7f);
-    XMStoreFloat3(&frameData.moonDir,
-        XMVector3Normalize(XMVectorSet(-0.3f, -1.0f, 0.5f, 0.0f)));
-    frameData.moonColor  = XMFLOAT3(0.4f, 0.4f, 0.6f);
+    // Flickering red/orange color for dramatic final stage
+    float flicker = 0.8f + 0.2f * sinf(m_elapsedTime * 7.0f);
+    frameData.spotColor    = XMFLOAT3(10.0f * flicker, 4.0f * flicker, 2.0f * flicker);
+    frameData.skyColor     = XMFLOAT4(0.05f, 0.01f, 0.02f, 1.0f);
 
-    // Sky color per scene
-    switch (m_index)
-    {
-    case 0: frameData.skyColor = XMFLOAT4(0.30f, 0.55f, 0.90f, 1.0f); break;
-    case 1: frameData.skyColor = XMFLOAT4(0.03f, 0.03f, 0.05f, 1.0f); break;
-    case 2: frameData.skyColor = XMFLOAT4(0.55f, 0.75f, 1.00f, 1.0f); break;
-    case 3: frameData.skyColor = XMFLOAT4(0.15f, 0.10f, 0.05f, 1.0f); break;
-    default:frameData.skyColor = XMFLOAT4(0.30f, 0.55f, 0.90f, 1.0f); break;
-    }
-
-    XMVECTOR playerVec = XMLoadFloat3(&m_playerPos);
-    XMVECTOR lightPos  = playerVec + lightDir * -30.0f;
-    XMMATRIX lightView = XMMatrixLookAtLH(lightPos, playerVec,
-        XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
-    XMMATRIX lightProj = XMMatrixOrthographicLH(60.0f, 60.0f, 0.1f, 200.0f);
+    XMMATRIX lightView = XMMatrixLookAtLH(spotEye, spotTarget, XMVectorSet(0, 1, 0, 0));
+    XMMATRIX lightProj = XMMatrixPerspectiveFovLH(XMConvertToRadians(55.0f), 1.0f, 0.1f, 200.0f);
     frameData.lightViewProjection = XMMatrixTranspose(lightView * lightProj);
 
-    // --- Shadow pass ---
+    // Shadow pass
     m_ctx.shadowMap->Bind(ctx);
     sm->BindShadowPass(ctx, m_ctx.playerTexture->GetSRV());
     sm->UpdatePerFrame(ctx, frameData);
     DrawScene();
 
-    // --- Main pass ---
+    // Main pass
     m_ctx.graphics->SetMainRenderTarget();
-    m_ctx.graphics->Clear(
-        frameData.skyColor.x, frameData.skyColor.y,
-        frameData.skyColor.z, 1.0f
-    );
+    m_ctx.graphics->Clear(0.05f, 0.01f, 0.02f, 1.0f);
     sm->BindMainPass(ctx, m_ctx.shadowMap->GetSRV());
     sm->UpdatePerFrame(ctx, frameData);
     DrawScene();
 
-    // Draw exit zone indicator
     m_exitZones.Draw(ctx, sm, m_ctx.cubeMesh);
 
-    // Cleanup
     ID3D11ShaderResourceView* nullSRV = nullptr;
     ctx->PSSetShaderResources(0, 1, &nullSRV);
 }
@@ -344,15 +251,13 @@ void SubScene::Draw()
 // ============================================================
 // DrawScene
 // ============================================================
-void SubScene::DrawScene()
+void FinalScene::DrawScene()
 {
     auto* ctx = m_ctx.graphics->GetContext();
     auto* sm  = m_ctx.shaderManager;
 
-    // Tilemap
     m_tileMap.Draw(ctx, sm, m_ctx.cubeMesh);
 
-    // Player sprite (2D quad, always faces camera)
     CBPerObject playerObj;
     XMMATRIX scale = XMMatrixScaling(1.5f, 1.5f, 1.5f);
     XMMATRIX trans = XMMatrixTranslation(m_playerPos.x, m_playerPos.y, 0.0f);
