@@ -37,6 +37,7 @@ struct CBPerMaterial {
     float roughness;
     float metallic;
     float emissive;
+    float pad;
     float useTexture;
 };
 

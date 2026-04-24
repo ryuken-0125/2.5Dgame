@@ -167,6 +167,7 @@ void FieldScene::Draw()
     // Cleanup
     ID3D11ShaderResourceView* nullSRV = nullptr;
     ctx->PSSetShaderResources(0, 1, &nullSRV);
+    m_ctx.graphics->Present();
 }
 
 void FieldScene::DrawScene(bool isShadowPass)
