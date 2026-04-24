@@ -134,6 +134,7 @@
     <ClCompile Include="collision.cpp" />
     <ClCompile Include="field_scene.cpp" />
     <ClCompile Include="Graphics.cpp" />
+    <ClCompile Include="lightManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Move.cpp" />
@@ -171,6 +172,7 @@
     <ClInclude Include="field_scene.h" />
     <ClInclude Include="game_context.h" />
     <ClInclude Include="Graphics.h" />
+    <ClInclude Include="lightManager.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Move.h" />
     <ClInclude Include="PlayerManager.h" />
