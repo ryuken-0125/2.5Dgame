@@ -74,10 +74,9 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <SDLCheck>false</SDLCheck>
+      <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalOptions>/utf-8 /FS %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -89,10 +88,9 @@
       <WarningLevel>Level3</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>false</SDLCheck>
+      <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalOptions>/utf-8 /FS %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -102,11 +100,9 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <SDLCheck>false</SDLCheck>
+      <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalOptions>/utf-8 /FS %(AdditionalOptions)</AdditionalOptions>
-      <ProgramDataBaseFileName>$(IntDir)vc143_cl.pdb</ProgramDataBaseFileName>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -118,10 +114,9 @@
       <WarningLevel>Level3</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>false</SDLCheck>
+      <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalOptions>/utf-8 /FS %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -131,70 +126,64 @@
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="collision.cpp" />
-    <ClCompile Include="field_scene.cpp" />
     <ClCompile Include="Graphics.cpp" />
+    <ClCompile Include="lightManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Move.cpp" />
-    <ClCompile Include="scene_manager.cpp" />
+    <ClCompile Include="PlayerManager.cpp" />
+    <ClCompile Include="PlayerStatus.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="ShadowMap.cpp" />
-    <ClCompile Include="sub_scene.cpp" />
     <ClCompile Include="Texture.cpp" />
-    <ClCompile Include="tilemap.cpp" />
+    <ClCompile Include="collision.cpp" />
     <ClCompile Include="warp_zone.cpp" />
+    <ClCompile Include="scene_manager.cpp" />
+    <ClCompile Include="field_scene.cpp" />
+    <ClCompile Include="sub_scene.cpp" />
+    <ClCompile Include="final_scene.cpp" />
+    <ClCompile Include="tilemap.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PBR_Math.hlsli" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="StandardPBR.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Shadow.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="collision.h" />
     <ClInclude Include="ConstantBuffer.h" />
-    <ClInclude Include="field_scene.h" />
-    <ClInclude Include="game_context.h" />
     <ClInclude Include="Graphics.h" />
+    <ClInclude Include="lightManager.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Move.h" />
-    <ClInclude Include="scene.h" />
-    <ClInclude Include="scene_manager.h" />
+    <ClInclude Include="PlayerManager.h" />
+    <ClInclude Include="PlayerStatus.h" />
     <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="ShadowMap.h" />
     <ClInclude Include="stb_image.h" />
-    <ClInclude Include="sub_scene.h" />
     <ClInclude Include="Texture.h" />
-    <ClInclude Include="tilemap.h" />
+    <ClInclude Include="collision.h" />
     <ClInclude Include="warp_zone.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Shadow.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
-      <FileType>Document</FileType>
-    </None>
+    <ClInclude Include="scene.h" />
+    <ClInclude Include="scene_manager.h" />
+    <ClInclude Include="field_scene.h" />
+    <ClInclude Include="sub_scene.h" />
+    <ClInclude Include="final_scene.h" />
+    <ClInclude Include="tilemap.h" />
+    <ClInclude Include="game_context.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <Target Name="CopyAssets" AfterTargets="Build">
+    <Copy SourceFiles="$(ProjectDir)StandardPBR.hlsl" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(ProjectDir)Shadow.hlsl"      DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(ProjectDir)PBR_Math.hlsli"   DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(ProjectDir)..\asset\texture\player.png" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+  </Target>
 </Project>

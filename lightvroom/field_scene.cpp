@@ -71,6 +71,12 @@ void FieldScene::Update(double deltaTime)
     const float DAY_DURATION = 10.0f;
     m_angle += (float)(2.0 * 3.14159265 / DAY_DURATION * deltaTime);
 
+    if (m_ctx.lightManager)
+    {
+        m_ctx.lightManager->Update((float)deltaTime);
+        m_ctx.lightManager->UpdateShadowCamera(m_playerPos);
+    }
+
     int warpResult = m_warpZones.Update(m_playerPos);
     if (warpResult >= 0)
         m_sceneManager.ChangeToSubScene(warpResult);
@@ -90,10 +96,20 @@ void FieldScene::Draw()
 
     // Build per-frame constant buffer
     CBPerFrame frameData = {};
-    frameData.viewProjection = XMMatrixTranspose(
-        m_camera.GetViewMatrix() * m_camera.GetProjectionMatrix()
-    );
-    frameData.cameraPos = m_camera.GetPosition();
+    if (m_ctx.lightManager)
+    {
+        frameData = m_ctx.lightManager->GetFrameData(
+            m_camera.GetViewMatrix() * m_camera.GetProjectionMatrix(),
+            m_camera.GetPosition()
+        );
+    }
+    else
+    {
+        frameData.viewProjection = XMMatrixTranspose(
+            m_camera.GetViewMatrix() * m_camera.GetProjectionMatrix()
+        );
+        frameData.cameraPos = m_camera.GetPosition();
+    }
 
     // Directional light (shared)
     XMVECTOR lightDirVec = XMVector3Normalize(XMVectorSet(0.3f, -1.0f, 0.5f, 0.0f));
@@ -151,7 +167,6 @@ void FieldScene::Draw()
     // Cleanup
     ID3D11ShaderResourceView* nullSRV = nullptr;
     ctx->PSSetShaderResources(0, 1, &nullSRV);
-    m_ctx.graphics->Present();
 }
 
 void FieldScene::DrawScene(bool isShadowPass)

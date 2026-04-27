@@ -14,6 +14,7 @@ enum class SceneType
     SUB_SCENE_1,    // Action scene 1
     SUB_SCENE_2,    // Action scene 2
     SUB_SCENE_3,    // Action scene 3
+    FINAL_STAGE,    // Final climax scene
 };
 
 class SceneManager
@@ -34,6 +35,9 @@ public:
 
     // Switch to sub-scene by index (0-3)
     void ChangeToSubScene(int index);
+
+    // Switch to final scene
+    void ChangeToFinalScene();
 
     void Update(double deltaTime);
     void Draw();

@@ -2,6 +2,7 @@
 #include "game_context.h"
 #include "field_scene.h"
 #include "sub_scene.h"
+#include "final_scene.h"
 
 //--------------------------------------
 // Init
@@ -23,6 +24,7 @@ static std::unique_ptr<Scene> CreateScene(SceneType type, SceneManager& sm, Game
     case SceneType::SUB_SCENE_1: return std::make_unique<SubScene>(sm, *ctx, 1);
     case SceneType::SUB_SCENE_2: return std::make_unique<SubScene>(sm, *ctx, 2);
     case SceneType::SUB_SCENE_3: return std::make_unique<SubScene>(sm, *ctx, 3);
+    case SceneType::FINAL_STAGE: return std::make_unique<FinalScene>(sm, *ctx);
     default: return nullptr;
     }
 }
@@ -49,6 +51,11 @@ void SceneManager::ChangeToSubScene(int index)
         SceneType::SUB_SCENE_3
     };
     ChangeScene(types[clamped]);
+}
+
+void SceneManager::ChangeToFinalScene()
+{
+    ChangeScene(SceneType::FINAL_STAGE);
 }
 
 //--------------------------------------
