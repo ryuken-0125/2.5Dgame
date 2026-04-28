@@ -1,11 +1,10 @@
-#include "PlayerManager.h"
+﻿#include "PlayerManager.h"
 #include "Move.h"
 #include "PlayerStatus.h"
 #include "Texture.h"
 #include "Camera.h"
 #include "ShaderManager.h"
 #include "Mesh.h"
-
 using namespace DirectX;
 
 PlayerManager::PlayerManager()
@@ -25,28 +24,33 @@ bool PlayerManager::Initialize(ID3D11Device* device)
 
     m_playerTexture = std::make_unique<Texture>();
     if (!m_playerTexture->Load(device, "asset/texture/player.png")) return false;
-
     return true;
 }
 
 void PlayerManager::Update(float deltaTime, Camera& camera)
 {
-    //移動の更新
-    m_move->ControlPlayer(m_playerPosition, deltaTime);
+    // --- 状態付与キーの検出 ---
+    if (m_move->CheckStunKey()) m_status->ApplyStun();
+    if (m_move->CheckSlowKey()) m_status->ApplySlow();
 
-    //ステータスの更新（ダッシュは後で追加するため、現在はfalse固定）
+    // --- 移動の更新（スタン・低速はStatusを参照） ---
+    m_move->ControlPlayer(m_playerPosition, deltaTime, *m_status);
+
+    // --- ステータスの更新 ---
     m_status->Update(deltaTime, false);
 
-    //カメラの追従設定
+    // --- カメラの追従設定 ---
     const XMFLOAT3 cameraOffset(0.0f, 4.0f, -6.0f);
     camera.SetFollowTarget(m_playerPosition, cameraOffset);
 }
 
-void PlayerManager::Draw(ID3D11DeviceContext* context, ShaderManager* shaderManager, Mesh* quadMesh, bool isShadowPass)
+void PlayerManager::Draw(ID3D11DeviceContext* context, ShaderManager* shaderManager,
+    Mesh* quadMesh, bool isShadowPass)
 {
     XMMATRIX scale = XMMatrixScaling(PLAYER_SCALE, PLAYER_SCALE, PLAYER_SCALE);
     XMMATRIX rot = XMMatrixRotationX(XMConvertToRadians(30.0f));
-    XMMATRIX trans = XMMatrixTranslation(m_playerPosition.x, m_playerPosition.y, m_playerPosition.z);
+    XMMATRIX trans = XMMatrixTranslation(
+        m_playerPosition.x, m_playerPosition.y, m_playerPosition.z);
 
     CBPerObject playerObj;
     playerObj.worldMatrix = XMMatrixTranspose(scale * rot * trans);
@@ -55,12 +59,11 @@ void PlayerManager::Draw(ID3D11DeviceContext* context, ShaderManager* shaderMana
     CBPerMaterial playerMat = { XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.9f, 0.0f, 0.0f, 1.0f };
     shaderManager->UpdatePerMaterial(context, playerMat);
 
-        ID3D11ShaderResourceView* pSRV = m_playerTexture->GetSRV();
+    ID3D11ShaderResourceView* pSRV = m_playerTexture->GetSRV();
     if (!isShadowPass) context->PSSetShaderResources(1, 1, &pSRV);
-
     quadMesh->Draw(context);
 
-        ID3D11ShaderResourceView* nullSRV = nullptr;
+    ID3D11ShaderResourceView* nullSRV = nullptr;
     if (!isShadowPass) context->PSSetShaderResources(1, 1, &nullSRV);
 }
 
@@ -68,6 +71,7 @@ ID3D11ShaderResourceView* PlayerManager::GetTextureSRV() const
 {
     return m_playerTexture->GetSRV();
 }
+
 bool PlayerManager::CheckFovToggle() const
 {
     return m_move->CheckFovToggle();

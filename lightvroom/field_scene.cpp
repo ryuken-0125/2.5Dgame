@@ -19,9 +19,12 @@ FieldScene::FieldScene(SceneManager& sm, GameContext& ctx)
 
 void FieldScene::Initialize()
 {
-    m_playerPos    = XMFLOAT3(0.0f, 0.0f, 0.0f);
+    m_playerPos = XMFLOAT3(0.0f, 0.0f, 0.0f);
     m_isWideCamera = false;
-    m_angle        = 0.0f;
+    m_angle = 0.0f;
+
+    // --- ステータス初期化 ---
+    m_playerStatus.Initialize();
 
     m_camera.SetPosition(0.0f, 2.0f, -8.0f);
     m_camera.SetFOV(XMConvertToRadians(90.0f), 1280.0f / 720.0f, 0.1f, 100.0f);
@@ -54,13 +57,21 @@ void FieldScene::Update(double deltaTime)
 {
     float dt = (float)deltaTime;
 
-    m_move.ControlPlayer(m_playerPos, dt);
+    // --- 状態付与キーの検出 ---
+    if (m_move.CheckStunKey()) m_playerStatus.ApplyStun();
+    if (m_move.CheckSlowKey()) m_playerStatus.ApplySlow();
+
+    // --- 移動の更新（スタン・低速はStatusを参照） ---
+    m_move.ControlPlayer(m_playerPos, dt, m_playerStatus);
+
+    // --- ステータスの更新 ---
+    m_playerStatus.Update(dt, false);
 
     if (m_move.CheckFovToggle())
     {
         m_isWideCamera = !m_isWideCamera;
         float fov = m_isWideCamera ? XMConvertToRadians(120.0f)
-                                   : XMConvertToRadians(90.0f);
+            : XMConvertToRadians(90.0f);
         m_camera.SetFOV(fov, 1280.0f / 720.0f, 0.1f, 100.0f);
     }
 
@@ -85,7 +96,7 @@ void FieldScene::Update(double deltaTime)
 void FieldScene::Draw()
 {
     auto* ctx = m_ctx.graphics->GetContext();
-    auto* sm  = m_ctx.shaderManager;
+    auto* sm = m_ctx.shaderManager;
 
     // Moon direction (fixed)
     XMVECTOR moonDir = XMVector3Normalize(XMVectorSet(-0.3f, -1.0f, 0.5f, 0.0f));
@@ -122,16 +133,16 @@ void FieldScene::Draw()
     XMStoreFloat3(&frameData.sunDir, sunDirVec);
     float sunIntensity = max(0.0f, -XMVectorGetY(sunDirVec));
     frameData.sunColor = XMFLOAT3(1.0f * sunIntensity, 0.9f * sunIntensity,
-                                   0.7f * sunIntensity);
+        0.7f * sunIntensity);
 
     // Moon
     XMStoreFloat3(&frameData.moonDir, moonDir);
     frameData.moonColor = moonColor;
-    frameData.skyColor  = XMFLOAT4(0.1f, 0.1f, 0.4f, 1.0f);
+    frameData.skyColor = XMFLOAT4(0.1f, 0.1f, 0.4f, 1.0f);
 
     // Light view-projection for shadow pass
     XMVECTOR playerVec = XMLoadFloat3(&m_playerPos);
-    XMVECTOR lightPos  = playerVec + lightDirVec * -30.0f;
+    XMVECTOR lightPos = playerVec + lightDirVec * -30.0f;
     XMMATRIX lightView = XMMatrixLookAtLH(lightPos, playerVec,
         XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f));
     XMMATRIX lightProj = XMMatrixOrthographicLH(40.0f, 40.0f, 0.1f, 100.0f);
@@ -172,7 +183,7 @@ void FieldScene::Draw()
 void FieldScene::DrawScene(bool isShadowPass)
 {
     auto* ctx = m_ctx.graphics->GetContext();
-    auto* sm  = m_ctx.shaderManager;
+    auto* sm = m_ctx.shaderManager;
 
     // 1. Floor
     CBPerObject floorObj;
@@ -188,7 +199,7 @@ void FieldScene::DrawScene(bool isShadowPass)
     // 2. Player (2D sprite quad)
     CBPerObject playerObj;
     XMMATRIX scale = XMMatrixScaling(1.5f, 1.5f, 1.5f);
-    XMMATRIX rot   = XMMatrixRotationX(XMConvertToRadians(30.0f));
+    XMMATRIX rot = XMMatrixRotationX(XMConvertToRadians(30.0f));
     XMMATRIX trans = XMMatrixTranslation(m_playerPos.x, m_playerPos.y, m_playerPos.z);
     playerObj.worldMatrix = XMMatrixTranspose(scale * rot * trans);
     sm->UpdatePerObject(ctx, playerObj);

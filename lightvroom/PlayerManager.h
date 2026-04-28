@@ -15,11 +15,10 @@ class PlayerManager
 public:
     PlayerManager();
     ~PlayerManager();
-
     bool Initialize(ID3D11Device* device);
     void Update(float deltaTime, Camera& camera);
-    void Draw(ID3D11DeviceContext* context, ShaderManager* shaderManager, Mesh* quadMesh, bool isShadowPass);
-
+    void Draw(ID3D11DeviceContext* context, ShaderManager* shaderManager,
+        Mesh* quadMesh, bool isShadowPass);
 
     DirectX::XMFLOAT3 GetPosition() const { return m_playerPosition; }
     ID3D11ShaderResourceView* GetTextureSRV() const;
@@ -27,8 +26,7 @@ public:
     bool CheckFovToggle() const;
 
 private:
-    DirectX::XMFLOAT3 m_playerPosition;
-
+    DirectX::XMFLOAT3         m_playerPosition;
     std::unique_ptr<Move>         m_move;
     std::unique_ptr<PlayerStatus> m_status;
     std::unique_ptr<Texture>      m_playerTexture;
