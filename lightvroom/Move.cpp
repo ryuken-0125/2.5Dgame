@@ -1,36 +1,88 @@
 #include "Move.h"
+#include "PlayerStatus.h"
 
 Move::Move() {}
 Move::~Move() {}
 
-void Move::ControlPlayer(DirectX::XMFLOAT3& playerPos, float deltaTime)
+/*====================================================================
+ * プレイヤー移動制御
+ * ・スタン中は一切移動しない
+ * ・低速中は速度に倍率を掛ける
+ *====================================================================*/
+void Move::ControlPlayer(DirectX::XMFLOAT3& playerPos, float deltaTime,
+    const PlayerStatus& status)
 {
-    float speed = 5.0f * deltaTime;
+    // スタン中は移動処理をスキップ
+    if (status.IsStunned()) return;
 
-    // ===================================
-    // WASDキーでプレイヤー(2Dキャラ)を移動
-    // ===================================
-    if (GetAsyncKeyState('W') & 0x8000) playerPos.z += speed; // 奥へ
-    if (GetAsyncKeyState('S') & 0x8000) playerPos.z -= speed; // 手前へ
-    if (GetAsyncKeyState('D') & 0x8000) playerPos.x += speed; // 右へ
-    if (GetAsyncKeyState('A') & 0x8000) playerPos.x -= speed; // 左へ
+    // 低速状態なら速度倍率を適用
+    float speed = BASE_MOVE_SPEED * status.GetSpeedMultiplier() * deltaTime;
+
+    if (GetAsyncKeyState(KEY_FORWARD) & 0x8000) playerPos.z += speed;  // 奥へ
+    if (GetAsyncKeyState(KEY_BACK) & 0x8000) playerPos.z -= speed;  // 手前へ
+    if (GetAsyncKeyState(KEY_RIGHT) & 0x8000) playerPos.x += speed;  // 右へ
+    if (GetAsyncKeyState(KEY_LEFT) & 0x8000) playerPos.x -= speed;  // 左へ
 }
 
+/*====================================================================
+ * 視野切替キー（E）の押した瞬間を検出
+ *====================================================================*/
 bool Move::CheckFovToggle()
 {
-    // static変数を使って、キーを「押しっぱなし」にしても1回しか反応しないようにする
-    static bool isEPressed = false;
-
-    if (GetAsyncKeyState('E') & 0x8000)
+    static bool isPressed = false;
+    if (GetAsyncKeyState(KEY_FOV_TOGGLE) & 0x8000)
     {
-        if (!isEPressed) {
-            isEPressed = true;
-            return true; // 押した瞬間！
+        if (!isPressed)
+        {
+            isPressed = true;
+            return true;
         }
     }
     else
     {
-        isEPressed = false; // 離した
+        isPressed = false;
+    }
+    return false;
+}
+
+/*====================================================================
+ * スタンキー（Q）の押した瞬間を検出
+ *====================================================================*/
+bool Move::CheckStunKey()
+{
+    static bool isPressed = false;
+    if (GetAsyncKeyState(KEY_STUN) & 0x8000)
+    {
+        if (!isPressed)
+        {
+            isPressed = true;
+            return true;
+        }
+    }
+    else
+    {
+        isPressed = false;
+    }
+    return false;
+}
+
+/*====================================================================
+ * 低速キー（R）の押した瞬間を検出
+ *====================================================================*/
+bool Move::CheckSlowKey()
+{
+    static bool isPressed = false;
+    if (GetAsyncKeyState(KEY_SLOW) & 0x8000)
+    {
+        if (!isPressed)
+        {
+            isPressed = true;
+            return true;
+        }
+    }
+    else
+    {
+        isPressed = false;
     }
     return false;
 }
