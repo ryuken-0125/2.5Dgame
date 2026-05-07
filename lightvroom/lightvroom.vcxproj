@@ -135,6 +135,11 @@
     <ClCompile Include="PlayerStatus.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="ShadowMap.cpp" />
+    <ClCompile Include="shop_manager.cpp" />
+    <ClCompile Include="shop_ui.cpp">
+      <SDLCheck Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</SDLCheck>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="collision.cpp" />
     <ClCompile Include="warp_zone.cpp" />
@@ -165,6 +170,9 @@
     <ClInclude Include="PlayerStatus.h" />
     <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="ShadowMap.h" />
+    <ClInclude Include="shop_item.h" />
+    <ClInclude Include="shop_manager.h" />
+    <ClInclude Include="shop_ui.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="collision.h" />
@@ -182,8 +190,8 @@
   </ImportGroup>
   <Target Name="CopyAssets" AfterTargets="Build">
     <Copy SourceFiles="$(ProjectDir)StandardPBR.hlsl" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="$(ProjectDir)Shadow.hlsl"      DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="$(ProjectDir)PBR_Math.hlsli"   DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(ProjectDir)Shadow.hlsl" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(ProjectDir)PBR_Math.hlsli" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="$(ProjectDir)..\asset\texture\player.png" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
   </Target>
 </Project>

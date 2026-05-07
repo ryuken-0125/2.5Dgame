@@ -87,3 +87,11 @@ void Graphics::Present()
 {
     m_swapChain->Present(1, 0);
 }
+
+void Graphics::ClearDepthOnly()
+{
+    // デプスを 1.0（最遠）にリセットする
+    // → 続けて描くUIが必ずシーン手前に表示される
+    m_context->ClearDepthStencilView(
+        m_depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+}
