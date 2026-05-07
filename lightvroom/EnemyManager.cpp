@@ -6,9 +6,9 @@ void EnemyManager::SpawnEnemy(EnemyType type, DirectX::XMFLOAT3 position) {
     std::unique_ptr<EnemyBase> newEnemy;
 
     switch (type) {
-    case EnemyType::MobA:
-        newEnemy = std::make_unique<MobEnemyA>();
-        break;
+    //case EnemyType::MobA:
+    //    newEnemy = std::make_unique<MobEnemyA>();
+    //    break;d
         // ‘¼‚Ì“GƒNƒ‰ƒX‚à‚±‚±‚É’Ç‰Á
     }
 
