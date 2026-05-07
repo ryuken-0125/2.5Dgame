@@ -26,10 +26,12 @@ public:
     bool CheckFovToggle() const;
 
 private:
-    DirectX::XMFLOAT3         m_playerPosition;
+    DirectX::XMFLOAT3 m_playerPosition;
+
     std::unique_ptr<Move>         m_move;
     std::unique_ptr<PlayerStatus> m_status;
     std::unique_ptr<Texture>      m_playerTexture;
+
 
     const float PLAYER_SCALE = 1.5f;
 };
