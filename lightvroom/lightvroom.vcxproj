@@ -126,6 +126,7 @@
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="EnemyManager.cpp" />
     <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="lightManager.cpp" />
     <ClCompile Include="main.cpp" />
@@ -157,6 +158,8 @@
     <ClInclude Include="Application.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="ConstantBuffer.h" />
+    <ClInclude Include="EnemyBase.h" />
+    <ClInclude Include="EnemyManager.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="lightManager.h" />
     <ClInclude Include="Mesh.h" />
@@ -182,8 +185,8 @@
   </ImportGroup>
   <Target Name="CopyAssets" AfterTargets="Build">
     <Copy SourceFiles="$(ProjectDir)StandardPBR.hlsl" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="$(ProjectDir)Shadow.hlsl"      DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="$(ProjectDir)PBR_Math.hlsli"   DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(ProjectDir)Shadow.hlsl" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(ProjectDir)PBR_Math.hlsli" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="$(ProjectDir)..\asset\texture\player.png" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
   </Target>
 </Project>
