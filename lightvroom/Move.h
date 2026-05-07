@@ -22,6 +22,14 @@ public:
 private:
     // --- 移動定数 ---
     const float BASE_MOVE_SPEED = 5.0f;
+    const float DASH_SPEED      = 2.0f;  //通常時の何倍速くなるか
+
+    // --- 追加：ジャンプ・重力定数 ---
+    const float JUMP_FORCE = 8.0f;      // 跳ねる力
+    const float GRAVITY    = -20.0f;    // 重力の強さ
+
+    float m_velocityY  = 0.0f; // Y軸方向の速度
+    bool  m_isGrounded = false; // 接地しているか
 
     // --- キーバインド ---
     const int KEY_FOV_TOGGLE = 'E';
@@ -31,4 +39,6 @@ private:
     const int KEY_BACK = 'S';
     const int KEY_RIGHT = 'D';
     const int KEY_LEFT = 'A';
+    const int KEY_DASH = VK_LSHIFT; //ダッシュ
+    const int KEY_JUMP = VK_LCONTROL;  // スペースキーでジャンプ
 };
