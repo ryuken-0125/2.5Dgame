@@ -10,6 +10,8 @@
 #include "Move.h"
 #include "PlayerStatus.h"   // 追加
 #include "warp_zone.h"
+#include "shop_manager.h"
+#include "shop_ui.h"
 #include <DirectXMath.h>
 #include <chrono>
 
@@ -38,4 +40,8 @@ private:
 
     void SetupWarpZones();
     void DrawScene(bool isShadowPass);
+
+    ShopManager  m_shopManager;
+    ShopUI       m_shopUI;
+    bool         m_pWasDown = false;   // P キーの前フレーム状態
 };

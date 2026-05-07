@@ -30,6 +30,7 @@ void FieldScene::Initialize()
     m_camera.SetFOV(XMConvertToRadians(90.0f), 1280.0f / 720.0f, 0.1f, 100.0f);
 
     SetupWarpZones();
+    m_shopUI.SetShopManager(&m_shopManager);
 }
 
 void FieldScene::Finalize() {}
@@ -57,14 +58,52 @@ void FieldScene::Update(double deltaTime)
 {
     float dt = (float)deltaTime;
 
-    // --- 状態付与キーの検出 ---
+    // ================================================
+    // P キーでショップ開閉（押した瞬間だけ）
+    // ================================================
+    bool pNow = (GetAsyncKeyState('P') & 0x8000) != 0;
+    if (pNow && !m_pWasDown)
+    {
+        if (m_shopUI.IsOpen()) m_shopUI.Close();
+        else                   m_shopUI.Open();
+    }
+    m_pWasDown = pNow;
+
+    m_shopUI.Update(static_cast<float>(deltaTime));
+
+    // ↓ これを追加
+    if (m_shopUI.WantsToClose())
+        m_shopUI.Close();
+
+    // ショップが開いている間はフィールドの更新をスキップ
+    if (m_shopUI.IsOpen()) return;
+
+    // ================================================
+    // ショップが開いている間はゲームを止めてUIへ委譲
+    // ================================================
+    if (m_shopUI.IsOpen())
+    {
+        m_shopUI.Update(dt);
+
+        // カメラ・ライトだけ更新してフィールドを止める
+        XMFLOAT3 offset(0.0f, 12.0f, -18.0f);
+        m_camera.SetFollowTarget(m_playerPos, offset);
+        m_camera.Update();
+        if (m_ctx.lightManager)
+        {
+            m_ctx.lightManager->Update(dt);
+            m_ctx.lightManager->UpdateShadowCamera(m_playerPos);
+        }
+        return;  // 移動・ワープゾーン処理をスキップ
+    }
+
+    // ================================================
+    // 以下は既存コード（ショップが閉じている時のみ）
+    // ================================================
     if (m_move.CheckStunKey()) m_playerStatus.ApplyStun();
     if (m_move.CheckSlowKey()) m_playerStatus.ApplySlow();
 
-    // --- 移動の更新（スタン・低速はStatusを参照） ---
     m_move.ControlPlayer(m_playerPos, dt, m_playerStatus);
-
-    // --- ステータスの更新 ---
     m_playerStatus.Update(dt, false);
 
     if (m_move.CheckFovToggle())
@@ -84,7 +123,7 @@ void FieldScene::Update(double deltaTime)
 
     if (m_ctx.lightManager)
     {
-        m_ctx.lightManager->Update((float)deltaTime);
+        m_ctx.lightManager->Update(dt);
         m_ctx.lightManager->UpdateShadowCamera(m_playerPos);
     }
 
@@ -172,10 +211,21 @@ void FieldScene::Draw()
     sm->UpdatePerMaterial(ctx, moonMat);
     m_ctx.sphereMesh->Draw(ctx);
 
-    // Draw warp zones
+    // Draw warp zones（既存）
     m_warpZones.Draw(ctx, sm, m_ctx.cubeMesh);
 
-    // Cleanup
+    // ================================================
+    // ショップUI（最後に2Dオーバーレイとして描画）
+    // ※ ClearDepthOnly() でシーンのデプスをリセットし
+    //   UIが必ず手前に表示されるようにする
+    // ================================================
+    if (m_shopUI.IsOpen())
+    {
+        m_ctx.graphics->ClearDepthOnly();
+        m_shopUI.Draw(ctx, sm, m_ctx.cubeMesh, 1280, 720);
+    }
+
+    // Cleanup（既存）
     ID3D11ShaderResourceView* nullSRV = nullptr;
     ctx->PSSetShaderResources(0, 1, &nullSRV);
 }

@@ -18,6 +18,8 @@ public:
     ID3D11Device* GetDevice() const { return m_device.Get(); }
     ID3D11DeviceContext* GetContext() const { return m_context.Get(); }
 
+    void ClearDepthOnly();
+
 private:
     // DirectXのコアオブジェクト群 (ComPtrが自動でメモリ解放(Release)をしてくれます)
     Microsoft::WRL::ComPtr<ID3D11Device> m_device;                   // デバイス（生成役）
