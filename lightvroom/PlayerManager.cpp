@@ -23,8 +23,14 @@ bool PlayerManager::Initialize(ID3D11Device* device)
     m_status->Initialize();
 
     m_playerTexture = std::make_unique<Texture>();
-    if (!m_playerTexture->Load(device, "../asset/texture/player.png")) return false;
-    //if (!m_playerTexture->Load(device, "asset/texture/player.png")) return false;
+
+    if (!m_playerTexture->Load(device, "../asset/texture/player.png"))
+    {
+        if (!m_playerTexture->Load(device, "asset/texture/player.png"))
+        {
+            return false;
+        }
+    }
     return true;
 }
 
