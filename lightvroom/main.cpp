@@ -7,7 +7,11 @@
 #include <crtdbg.h>
 
 
+//山室
+
 //りゅうけんです
+
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
     //終了時にメモリの解放忘れ（リーク）がないかを出力ウィンドウに表示する設定
@@ -28,8 +32,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 }
 
 /*
-* 
-*FBXモデルの頂点データをVertex構造体の配列に変換する例（擬似コード）
+
+FBXモデルの頂点データをVertex構造体の配列に変換する例（擬似コード）
 for (unsigned int i = 0; i < fbxModel->mNumVertices; i++)
 {
     Vertex v;
