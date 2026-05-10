@@ -1,31 +1,31 @@
-
+ï»¿
 #include "Application.h"
 
-// ƒƒ‚ƒŠƒŠ[ƒN‚ðƒ`ƒFƒbƒN‚·‚é‚½‚ß‚Ìƒ‰ƒCƒuƒ‰ƒŠiƒfƒoƒbƒO—pj
+// ãƒ¡ãƒ¢ãƒªãƒªãƒ¼ã‚¯ã‚’ãƒã‚§ãƒƒã‚¯ã™ã‚‹ãŸã‚ã®ãƒ©ã‚¤ãƒ–ãƒ©ãƒªï¼ˆãƒ‡ãƒãƒƒã‚°ç”¨ï¼‰
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
 #include <crtdbg.h>
 
 
-//ŽRŽº
+//å±±å®¤
 
-//‚è‚ã‚¤‚¯‚ñ‚Å‚·
+//ã‚Šã‚…ã†ã‘ã‚“ã§ã™
 
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-    //I—¹Žž‚Éƒƒ‚ƒŠ‚Ì‰ð•ú–Y‚êiƒŠ[ƒNj‚ª‚È‚¢‚©‚ðo—ÍƒEƒBƒ“ƒhƒE‚É•\Ž¦‚·‚éÝ’è
+    //çµ‚äº†æ™‚ã«ãƒ¡ãƒ¢ãƒªã®è§£æ”¾å¿˜ã‚Œï¼ˆãƒªãƒ¼ã‚¯ï¼‰ãŒãªã„ã‹ã‚’å‡ºåŠ›ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã«è¡¨ç¤ºã™ã‚‹è¨­å®š
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
     Application app;
 
-    // ƒEƒBƒ“ƒhƒEƒTƒCƒY‚ð 1280x720 ‚ÉŽw’è‚µ‚Ä‰Šú‰»
+    // ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚µã‚¤ã‚ºã‚’ 1280x720 ã«æŒ‡å®šã—ã¦åˆæœŸåŒ–
     if (!app.Initialize(hInstance, nCmdShow, 1920, 1080))
     {
         return -1;
     }
 
-    // ƒQ[ƒ€‚ÌƒƒCƒ“ƒ‹[ƒvŠJŽn
+    // ã‚²ãƒ¼ãƒ ã®ãƒ¡ã‚¤ãƒ³ãƒ«ãƒ¼ãƒ—é–‹å§‹
     app.Run();
 
     return 0;
@@ -33,14 +33,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 /*
 
-FBXƒ‚ƒfƒ‹‚Ì’¸“_ƒf[ƒ^‚ðVertex\‘¢‘Ì‚Ì”z—ñ‚É•ÏŠ·‚·‚é—ái‹[Ž—ƒR[ƒhj
+FBXãƒ¢ãƒ‡ãƒ«ã®é ‚ç‚¹ãƒ‡ãƒ¼ã‚¿ã‚’Vertexæ§‹é€ ä½“ã®é…åˆ—ã«å¤‰æ›ã™ã‚‹ä¾‹ï¼ˆæ“¬ä¼¼ã‚³ãƒ¼ãƒ‰ï¼‰
 for (unsigned int i = 0; i < fbxModel->mNumVertices; i++)
 {
     Vertex v;
     v.Pos.x = fbxModel->mVertices[i].x;
     v.Pos.y = fbxModel->mVertices[i].y;
     v.Pos.z = fbxModel->mVertices[i].z;
-    // (–@ü‚âUV‚à“¯—l‚Éƒ‹[ƒv‚Å‘ã“ü)
+    // (æ³•ç·šã‚„UVã‚‚åŒæ§˜ã«ãƒ«ãƒ¼ãƒ—ã§ä»£å…¥)
 
     vertices.push_back(v);
 }

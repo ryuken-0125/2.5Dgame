@@ -1,4 +1,4 @@
-#include "Graphics.h"
+ï»¿#include "Graphics.h"
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -55,7 +55,7 @@ bool Graphics::Initialize(HWND hwnd, int width, int height)
     hr = m_device->CreateDepthStencilView(depthStencilBuffer.Get(), nullptr, &m_depthStencilView);
     if (FAILED(hr)) return false;
 
-    //m_viewport‚É•Û‘¶‚·‚é‚æ‚¤‚É•ÏX
+    //m_viewportã«ä¿å­˜ã™ã‚‹ã‚ˆã†ã«å¤‰æ›´
     m_viewport = {};
     m_viewport.Width = (FLOAT)width;
     m_viewport.Height = (FLOAT)height;
@@ -64,14 +64,14 @@ bool Graphics::Initialize(HWND hwnd, int width, int height)
     m_viewport.TopLeftX = 0;
     m_viewport.TopLeftY = 0;
 
-    SetMainRenderTarget(); //‰Šú‰»Žž‚ÉƒƒCƒ“‰æ–Ê‚ðƒZƒbƒg
+    SetMainRenderTarget(); //åˆæœŸåŒ–æ™‚ã«ãƒ¡ã‚¤ãƒ³ç”»é¢ã‚’ã‚»ãƒƒãƒˆ
 
     return true;
 }
 
 void Graphics::SetMainRenderTarget()
 {
-    // –{—ˆ‚Ì‰æ–Ê‚Æ‰ð‘œ“x‚ðÄƒZƒbƒg‚·‚é
+    // æœ¬æ¥ã®ç”»é¢ã¨è§£åƒåº¦ã‚’å†ã‚»ãƒƒãƒˆã™ã‚‹
     m_context->RSSetViewports(1, &m_viewport);
     m_context->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());
 }

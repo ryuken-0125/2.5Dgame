@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include <wrl/client.h>
@@ -11,39 +11,35 @@ struct CBPerFrame
     DirectX::XMMATRIX viewProjection;
     DirectX::XMMATRIX lightViewProjection;
     DirectX::XMFLOAT3 cameraPos;    float pad1;
-
-    // ‘¾—z‚Ìƒf[ƒ^
+    // ãƒ©ã‚¤ãƒˆï¼ˆå…±é€šï¼‰
     DirectX::XMFLOAT3 lightDir;     float pad2;
     DirectX::XMFLOAT3 lightColor;   float pad3;
-
-    // Œ‚Ìƒf[ƒ^
+    // å¤ªé™½
     DirectX::XMFLOAT3 sunDir;       float pad4;
-    DirectX::XMFLOAT3 sunColor;     float pad5; 
-
-   
-    DirectX::XMFLOAT3 moonDir;      float pad6; 
-    DirectX::XMFLOAT3 moonColor;    float pad7; 
-
-    // ƒXƒ|ƒbƒgƒ‰ƒCƒgi‹üj—p
-    DirectX::XMFLOAT3 spotPos;      float spotRange;    // Œõ‚Ì“Í‚­‹——£
-    DirectX::XMFLOAT3 spotDir;      float spotCosInner; // “à‘¤‚ÌŠp“xi1.0‚É‹ß‚Ã‚­‚Ù‚Ç‰s‚¢j
-    DirectX::XMFLOAT3 spotColor;    float spotCosOuter; // ŠO‘¤‚ÌŠp“xi‚Ú‚©‚µ—pj
-
-    // ‹ó‚ÌF
-    DirectX::XMFLOAT4 skyColor;  
+    DirectX::XMFLOAT3 sunColor;     float pad5;
+    // æœˆ
+    DirectX::XMFLOAT3 moonDir;      float pad6;
+    DirectX::XMFLOAT3 moonColor;    float pad7;
+    // ç©ºã®è‰²
+    DirectX::XMFLOAT4 skyColor;
 };
 
-struct CBPerObject {
+struct CBPerObject
+{
     DirectX::XMMATRIX worldMatrix;
 };
 
-struct CBPerMaterial {
+// [Fix1] useTexture ã‚’ pad ã®å‰ã«ç½®ãã¨ HLSL å´ float4 ã‚¢ãƒ©ã‚¤ãƒ¡ãƒ³ãƒˆãŒã‚ºãƒ¬ã‚‹ã€‚
+// HLSL ã® cbuffer ã¯ float4 å¢ƒç•Œã§ãƒ‘ãƒƒã‚¯ã•ã‚Œã‚‹ãŸã‚ã€
+//   albedo(float4) + roughness(float) + metallic(float) + emissive(float) + useTexture(float)
+// ã®é †ã«ã™ã‚‹ã“ã¨ã§ 1 ã¤ã® float4 ã«åã¾ã‚Šãƒ‘ãƒ‡ã‚£ãƒ³ã‚°ä¸è¦ã«ãªã‚‹ã€‚
+struct CBPerMaterial
+{
     DirectX::XMFLOAT4 albedo;
     float roughness;
     float metallic;
-    float emissive; // 1.0 ‚Å•¨‘Ì©‘Ì‚ªŒõŒ¹‚Ì‚æ‚¤‚ÉŒõ‚é
-    float pad;
-    float useTexture;//1.0‚È‚ç‰æ‘œ‚ğg‚¤A0.0‚È‚çg‚í‚È‚¢
+    float emissive;
+    float useTexture; // [Fix1] pad ã¨ useTexture ã‚’å…¥ã‚Œæ›¿ãˆï¼ˆHLSL ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆåˆã‚ã›ï¼‰
 };
 
 class ShaderManager
@@ -52,12 +48,14 @@ public:
     ShaderManager();
     ~ShaderManager();
 
-    //ƒVƒƒƒhƒE—p‚Ìƒtƒ@ƒCƒ‹ƒpƒX‚àó‚¯æ‚é
-    bool Initialize(ID3D11Device* device, const std::wstring& pbrFilePath, const std::wstring& shadowFilePath);
+    bool Initialize(ID3D11Device* device,
+        const std::wstring& pbrFilePath,
+        const std::wstring& shadowFilePath);
 
-    //•`‰æƒpƒX‚ÌØ‚è‘Ö‚¦
-    void BindShadowPass(ID3D11DeviceContext* context, ID3D11ShaderResourceView* textureSRV = nullptr);
-    void BindMainPass(ID3D11DeviceContext* context, ID3D11ShaderResourceView* shadowSRV);
+    void BindShadowPass(ID3D11DeviceContext* context,
+        ID3D11ShaderResourceView* textureSRV = nullptr);
+    void BindMainPass(ID3D11DeviceContext* context,
+        ID3D11ShaderResourceView* shadowSRV);
 
     void UpdatePerFrame(ID3D11DeviceContext* context, const CBPerFrame& data);
     void UpdatePerObject(ID3D11DeviceContext* context, const CBPerObject& data);
@@ -68,13 +66,13 @@ private:
 
     Microsoft::WRL::ComPtr<ID3D11VertexShader> m_vertexShader;
     Microsoft::WRL::ComPtr<ID3D11PixelShader>  m_pixelShader;
-    Microsoft::WRL::ComPtr<ID3D11VertexShader> m_shadowVertexShader; // 
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> m_shadowVertexShader;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader>  m_shadowPixelShader;
     Microsoft::WRL::ComPtr<ID3D11InputLayout>  m_inputLayout;
-    Microsoft::WRL::ComPtr<ID3D11SamplerState> m_samplerClamp;       // ‰e‚ÌƒMƒUƒMƒU‚ğŒ¸‚ç‚·ƒtƒBƒ‹ƒ^[
-    Microsoft::WRL::ComPtr<ID3D11PixelShader>  m_shadowPixelShader; //
-    Microsoft::WRL::ComPtr<ID3D11SamplerState> m_samplerLinear;     //‰æ‘œ“\‚è•t‚¯—p
+    Microsoft::WRL::ComPtr<ID3D11SamplerState> m_samplerClamp;
+    Microsoft::WRL::ComPtr<ID3D11SamplerState> m_samplerLinear;
 
-    ConstantBuffer<CBPerFrame> m_cbPerFrame;
-    ConstantBuffer<CBPerObject> m_cbPerObject;
+    ConstantBuffer<CBPerFrame>    m_cbPerFrame;
+    ConstantBuffer<CBPerObject>   m_cbPerObject;
     ConstantBuffer<CBPerMaterial> m_cbPerMaterial;
 };

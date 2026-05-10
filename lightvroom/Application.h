@@ -1,4 +1,4 @@
-
+ï»¿
 #pragma once
 #include <windows.h>
 #include <memory>
@@ -6,9 +6,10 @@
 #include "ShaderManager.h"
 #include "ShadowMap.h"
 #include "Mesh.h"
-#include "Camera.h"
-#include "Move.h"
+#include "ShadowMap.h"
 #include "Texture.h"
+#include "game_context.h"
+#include "scene_manager.h"
 
 class Application
 {
@@ -18,12 +19,12 @@ public:
 
     bool Initialize(HINSTANCE hInstance, int nCmdShow, int width, int height);
     void Run();
-    void Release(); // š’Ç‰ÁF–¾¦“I‚È‰ğ•úˆ—
+    void Release(); // â˜…è¿½åŠ ï¼šæ˜ç¤ºçš„ãªè§£æ”¾å‡¦ç†
 
 private:
     static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-    // š’Ç‰ÁFƒ‹[ƒv‚Ì’†g‚ğ–ğŠ„‚²‚Æ‚É•ªŠ„
+    // â˜…è¿½åŠ ï¼šãƒ«ãƒ¼ãƒ—ã®ä¸­èº«ã‚’å½¹å‰²ã”ã¨ã«åˆ†å‰²
     void Update(float deltaTime);
     void Draw();
     void DrawScene(bool isShadowPass);
@@ -32,30 +33,17 @@ private:
     HINSTANCE m_hInstance;
 
     std::unique_ptr<Graphics> m_graphics;
-    std::unique_ptr<ShaderManager> m_shaderManager;
-    std::unique_ptr<ShadowMap> m_shadowMap;
+    std::unique_ptr<ShaderManager> m_shaderManager; 
 
     std::unique_ptr<Mesh> m_cubeMesh;
     std::unique_ptr<Mesh> m_sphereMesh;
     std::unique_ptr<Mesh> m_floorMesh;
     std::unique_ptr<Mesh> m_quadMesh;
 
+    std::unique_ptr<ShadowMap> m_shadowMap;
     std::unique_ptr<Texture> m_playerTexture;
+    std::unique_ptr<Texture> m_tilesetTexture;
 
-    Camera m_camera;
-    Move m_move;
-    DirectX::XMFLOAT3 m_playerPos;
-    bool m_isWideCamera;
-
-    // --- Update‚ÆDraw‚Å‹¤—L‚·‚éƒf[ƒ^ ---
-    float m_elapsedTime;
-    DirectX::XMFLOAT4 m_currentSkyColor;
-    DirectX::XMFLOAT3 m_moonPos;
-
-    DirectX::XMFLOAT3 m_eyePos;          // –Ú‚ÌˆÊ’u
-    DirectX::XMFLOAT3 m_lightTargetPos;   // Œ»İ‚ÌŒõ‚Ì–Ú•W’n“_i’n–Êãj
-    DirectX::XMFLOAT3 m_lightMoveGoal;    // Ÿ‚ÌˆÚ“®æ
-    float m_lightMoveTimer;               // ˆÚ“®ƒ^ƒCƒ}[
-
-    CBPerFrame m_frameData;
+    GameContext m_gameContext;
+    SceneManager m_sceneManager;
 };
