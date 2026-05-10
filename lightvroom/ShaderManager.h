@@ -27,6 +27,8 @@ struct CBPerFrame
 struct CBPerObject
 {
     DirectX::XMMATRIX worldMatrix;
+    DirectX::XMFLOAT2 uvOffset;
+    DirectX::XMFLOAT2 uvScale;
 };
 
 // [Fix1] useTexture を pad の前に置くと HLSL 側 float4 アライメントがズレる。

@@ -132,6 +132,7 @@
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="collision.cpp" />
+    <ClCompile Include="Effect.cpp" />
     <ClCompile Include="field_scene.cpp" />
     <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="main.cpp" />
@@ -166,6 +167,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="collision.h" />
     <ClInclude Include="ConstantBuffer.h" />
+    <ClInclude Include="Effect.h" />
     <ClInclude Include="field_scene.h" />
     <ClInclude Include="game_context.h" />
     <ClInclude Include="Graphics.h" />

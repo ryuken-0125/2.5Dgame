@@ -10,6 +10,9 @@
 #include "Texture.h"
 #include "game_context.h"
 #include "scene_manager.h"
+#include "Move.h"
+#include "Effect.h"
+
 
 class Application
 {
@@ -43,6 +46,9 @@ private:
     std::unique_ptr<ShadowMap> m_shadowMap;
     std::unique_ptr<Texture> m_playerTexture;
     std::unique_ptr<Texture> m_tilesetTexture;
+
+    std::unique_ptr<Move> m_move;                 ///< 入力・移動管理
+    std::unique_ptr<Effect> m_effect;             ///< エフェクト管理  
 
     GameContext m_gameContext;
     SceneManager m_sceneManager;

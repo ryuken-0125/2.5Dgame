@@ -18,6 +18,14 @@ void Move::ControlPlayer(DirectX::XMFLOAT3& playerPos, float deltaTime)
 
 bool Move::CheckFovToggle()
 {
+
+    // Eキーのトリガー判定（長押し防止）
+    static bool previousE = false;
+    bool currentE = (GetAsyncKeyState('F') & 0x8000) != 0;
+    m_isActionKeyPressed = (currentE && !previousE);
+    previousE = currentE;
+
+
     // static変数を使って、キーを「押しっぱなし」にしても1回しか反応しないようにする
     static bool isEPressed = false;
 

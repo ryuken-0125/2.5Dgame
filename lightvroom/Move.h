@@ -15,5 +15,9 @@ public:
     // Eキーが押された瞬間だけ true を返す（トグル用）
     bool CheckFovToggle();
 
+
     // ※ControlCameraは追従になったため削除またはコメントアウトしてOKです
+
+private:
+	bool m_isActionKeyPressed;// トグルキーの状態を管理するためのフラグ
 };
