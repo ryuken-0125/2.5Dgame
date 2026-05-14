@@ -31,9 +31,11 @@ void FieldScene::Initialize()
 
     SetupWarpZones();
     m_shopUI.SetShopManager(&m_shopManager);
+
+    m_effect.Initialize(m_ctx.graphics->GetDevice(), "../asset/texture/effect1.png");
 }
 
-void FieldScene::Finalize() {}
+void FieldScene::Finalize() {}  
 
 void FieldScene::SetupWarpZones()
 {
@@ -105,6 +107,34 @@ void FieldScene::Update(double deltaTime)
 
     m_move.ControlPlayer(m_playerPos, dt, m_playerStatus);
     m_playerStatus.Update(dt, false);
+
+    if (m_move.IsActionTriggered())
+    {
+        // 定数：プレイヤーからどれくらい離れた位置に出すか
+        const float EFFECT_DISTANCE = 2.0f;
+
+        // プレイヤーの現在位置をベースにする
+        DirectX::XMFLOAT3 effectPosition = m_playerPos;
+
+        // Moveクラスから向いている方向ベクトルを取得
+        DirectX::XMFLOAT3 facingDirection = m_move.GetFacingDirection();
+
+        // 座標を「向いている方向へ、DISTANCE分だけずらす」
+        effectPosition.x += facingDirection.x * EFFECT_DISTANCE;
+        effectPosition.z += facingDirection.z * EFFECT_DISTANCE;
+
+        // ずらした座標でエフェクトを再生
+        m_effect.Play(effectPosition);
+    }
+    m_effect.Update(dt);
+
+    /*
+    if (GetAsyncKeyState('J') & 0x8000)
+    {
+        m_effect.Play(m_playerPos);
+    }
+    m_effect.Update(dt); // アニメーションのコマ送り
+    */
 
     if (m_move.CheckFovToggle())
     {
@@ -241,6 +271,8 @@ void FieldScene::DrawScene(bool isShadowPass)
         XMMatrixScaling(40.0f, 0.1f, 40.0f) *
         XMMatrixTranslation(0.0f, -0.1f, 0.0f)
     );
+    floorObj.uvOffset = XMFLOAT2(0.0f, 0.0f); 
+    floorObj.uvScale = XMFLOAT2(1.0f, 1.0f);  
     sm->UpdatePerObject(ctx, floorObj);
     CBPerMaterial floorMat = { XMFLOAT4(0.3f, 0.5f, 0.3f, 1.0f), 0.8f, 0.0f, 0.0f, 0.0f };
     sm->UpdatePerMaterial(ctx, floorMat);
@@ -252,6 +284,8 @@ void FieldScene::DrawScene(bool isShadowPass)
     XMMATRIX rot = XMMatrixRotationX(XMConvertToRadians(30.0f));
     XMMATRIX trans = XMMatrixTranslation(m_playerPos.x, m_playerPos.y, m_playerPos.z);
     playerObj.worldMatrix = XMMatrixTranspose(scale * rot * trans);
+    playerObj.uvOffset = XMFLOAT2(0.0f, 0.0f); 
+    playerObj.uvScale = XMFLOAT2(1.0f, 1.0f);  
     sm->UpdatePerObject(ctx, playerObj);
 
     CBPerMaterial playerMat = { XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.9f, 0.0f, 0.0f, 1.0f };
@@ -273,8 +307,16 @@ void FieldScene::DrawScene(bool isShadowPass)
     // 3. Center sphere
     CBPerObject sphereObj;
     sphereObj.worldMatrix = XMMatrixTranspose(XMMatrixTranslation(0.0f, 1.0f, 0.0f));
+    sphereObj.uvOffset = XMFLOAT2(0.0f, 0.0f); 
+    sphereObj.uvScale = XMFLOAT2(1.0f, 1.0f);  
     sm->UpdatePerObject(ctx, sphereObj);
     CBPerMaterial sphereMat = { XMFLOAT4(0.56f, 0.57f, 0.58f, 1.0f), 0.1f, 1.0f, 0.0f, 0.0f };
     sm->UpdatePerMaterial(ctx, sphereMat);
     m_ctx.sphereMesh->Draw(ctx);
+
+    if (!isShadowPass)
+    {
+        m_effect.Draw(ctx, sm, m_ctx.quadMesh);
+    }
+
 }

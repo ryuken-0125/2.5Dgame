@@ -34,6 +34,8 @@ cbuffer cbPerFrame : register(b0)
 cbuffer cbPerObject : register(b1)
 {
     matrix worldMatrix;
+    float2 uvOffset;
+    float2 uvScale; 
 }
 
 cbuffer cbPerMaterial : register(b2)
@@ -68,7 +70,7 @@ PS_INPUT VSMain(VS_INPUT input)
     PS_INPUT output;
     float4 worldPos = mul(float4(input.Pos, 1.0f), worldMatrix);
     output.Pos = mul(worldPos, lightViewProjection);
-    output.TexCoord = input.TexCoord;
+    output.TexCoord = input.TexCoord * uvScale + uvOffset;
     return output;
 }
 

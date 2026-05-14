@@ -30,6 +30,15 @@ struct CBPerFrame
 
 struct CBPerObject {
     DirectX::XMMATRIX worldMatrix;
+    DirectX::XMFLOAT2 uvOffset;
+    DirectX::XMFLOAT2 uvScale;  
+
+    CBPerObject()
+    {
+        worldMatrix = DirectX::XMMatrixIdentity();
+        uvOffset = DirectX::XMFLOAT2(0.0f, 0.0f);
+        uvScale = DirectX::XMFLOAT2(1.0f, 1.0f); 
+    }
 };
 
 struct CBPerMaterial {

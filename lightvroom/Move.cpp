@@ -1,8 +1,14 @@
 #include "Move.h"
 #include "PlayerStatus.h"
+#include "Effect.h"
+#include <cmath>
 
-Move::Move() {}
+//Move::Move() {}
+
+Move::Move() : m_isEffectTriggered(false), m_previousEffectKey(false) {}
 Move::~Move() {}
+
+// コンストラクタを更新
 
 /*====================================================================
  * プレイヤー移動制御
@@ -27,10 +33,31 @@ void Move::ControlPlayer(DirectX::XMFLOAT3& playerPos, float deltaTime,
     // 低速状態なら速度倍率を適用
     speed *= status.GetSpeedMultiplier() * deltaTime;
 
+	// 移動入力の処理  
+    bool isMoving = false;
+    DirectX::XMFLOAT3 moveVector = { 0.0f, 0.0f, 0.0f };
+
     if (GetAsyncKeyState(KEY_FORWARD) & 0x8000) playerPos.z += speed;  // 奥へ
     if (GetAsyncKeyState(KEY_BACK) & 0x8000) playerPos.z -= speed;  // 手前へ
     if (GetAsyncKeyState(KEY_RIGHT) & 0x8000) playerPos.x += speed;  // 右へ
     if (GetAsyncKeyState(KEY_LEFT) & 0x8000) playerPos.x -= speed;  // 左へ
+
+    // 移動キーが押されていたら、向いている方向を更新
+    if (isMoving)
+    {
+        // ベクトルを正規化（斜め移動でも長さを1にする計算）
+        float vectorLength = std::sqrt(moveVector.x * moveVector.x + moveVector.z * moveVector.z);
+        if (vectorLength > 0.0f)
+        {
+            m_facingDirection.x = moveVector.x / vectorLength;
+            m_facingDirection.y = 0.0f;
+            m_facingDirection.z = moveVector.z / vectorLength;
+        }
+    }
+
+    bool currentActionKey = (GetAsyncKeyState('J') & 0x8000) != 0;
+    m_isActionTriggered = (currentActionKey && !m_previousActionKey);
+    m_previousActionKey = currentActionKey;
 
     // ジャンプ
     const float GROUND_Y = 0.0f; // 一旦地面の高さを0
