@@ -5,6 +5,7 @@
 #include "Camera.h"
 #include "ShaderManager.h"
 #include "Mesh.h"
+#include "Effect.h"
 using namespace DirectX;
 
 PlayerManager::PlayerManager()
@@ -31,6 +32,9 @@ bool PlayerManager::Initialize(ID3D11Device* device)
             return false;
         }
     }
+    m_effect = std::make_unique<Effect>();
+    if (!m_effect->Initialize(device, "../asset/texture/effect1.png")) return false;
+
     return true;
 }
 
@@ -49,6 +53,12 @@ void PlayerManager::Update(float deltaTime, Camera& camera)
     // --- カメラの追従設定 ---
     const XMFLOAT3 cameraOffset(0.0f, 4.0f, -6.0f);
     camera.SetFollowTarget(m_playerPosition, cameraOffset);
+
+    if (m_move->IsEffectTriggered())
+    {
+        m_effect->Play(m_playerPosition); // Jキーが押されたら現在位置で再生開始
+    }
+    m_effect->Update(deltaTime);
 }
 
 void PlayerManager::Draw(ID3D11DeviceContext* context, ShaderManager* shaderManager,
@@ -72,6 +82,11 @@ void PlayerManager::Draw(ID3D11DeviceContext* context, ShaderManager* shaderMana
 
     ID3D11ShaderResourceView* nullSRV = nullptr;
     if (!isShadowPass) context->PSSetShaderResources(1, 1, &nullSRV);
+
+    if (!isShadowPass) 
+    {
+        m_effect->Draw(context, shaderManager, quadMesh);
+    }
 }
 
 ID3D11ShaderResourceView* PlayerManager::GetTextureSRV() const

@@ -39,6 +39,8 @@ cbuffer cbPerFrame : register(b0)
 cbuffer cbPerObject : register(b1)
 {
     matrix worldMatrix;
+    float2 uvOffset; 
+    float2 uvScale;
 }
 
 cbuffer cbPerMaterial : register(b2)
@@ -86,7 +88,7 @@ PS_INPUT VSMain(VS_INPUT input)
     float4 worldPos = mul(float4(input.Pos, 1.0f), worldMatrix);
     output.WorldPos = worldPos.xyz;
     output.Pos = mul(worldPos, viewProjection);
-    output.TexCoord = input.TexCoord;
+    output.TexCoord = input.TexCoord * uvScale + uvOffset;
     output.Normal = normalize(mul(input.Normal, (float3x3) worldMatrix));
     output.Tangent = normalize(mul(input.Tangent, (float3x3) worldMatrix));
     output.Binormal = cross(output.Normal, output.Tangent);

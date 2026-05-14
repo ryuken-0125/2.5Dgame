@@ -8,10 +8,11 @@
 #include "game_context.h"
 #include "Camera.h"
 #include "Move.h"
-#include "PlayerStatus.h"   // 追加
+#include "PlayerStatus.h" 
 #include "warp_zone.h"
 #include "shop_manager.h"
 #include "shop_ui.h"
+#include "Effect.h"
 #include <DirectXMath.h>
 #include <chrono>
 
@@ -31,6 +32,7 @@ private:
     Move              m_move;
     PlayerStatus      m_playerStatus;   // 追加
     WarpZoneManager   m_warpZones;
+    Effect            m_effect;
 
     DirectX::XMFLOAT3 m_playerPos;
     bool              m_isWideCamera;

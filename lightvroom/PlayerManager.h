@@ -3,6 +3,8 @@
 #include <DirectXMath.h>
 #include <d3d11.h>
 
+#include "Effect.h"
+
 class Move;
 class PlayerStatus;
 class Texture;
@@ -31,7 +33,7 @@ private:
     std::unique_ptr<Move>         m_move;
     std::unique_ptr<PlayerStatus> m_status;
     std::unique_ptr<Texture>      m_playerTexture;
-
+    std::unique_ptr<Effect>       m_effect;
 
     const float PLAYER_SCALE = 1.5f;
 };
