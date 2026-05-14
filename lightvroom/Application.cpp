@@ -64,10 +64,10 @@ bool Application::Initialize(HINSTANCE hInstance, int nCmdShow, int width, int h
         MessageBox(m_hwnd, "tileset.png load failed!", "Error", MB_OK);
         return false;
     }
-
+    
     m_move = std::make_unique<Move>();
     m_effect = std::make_unique<Effect>();
-    m_effect->Initialize(m_graphics->GetDevice(), "../asset/texture/effect1.png");
+        m_effect->Initialize(m_graphics->GetDevice(), "../asset/texture/effect1.png");
 
     // Set up GameContext
     m_gameContext.graphics = m_graphics.get();
