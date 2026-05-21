@@ -143,6 +143,7 @@
     </ClCompile>
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="collision.cpp" />
+    <ClCompile Include="Trap.cpp" />
     <ClCompile Include="warp_zone.cpp" />
     <ClCompile Include="scene_manager.cpp" />
     <ClCompile Include="field_scene.cpp" />
@@ -179,6 +180,7 @@
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="collision.h" />
+    <ClInclude Include="Trap.h" />
     <ClInclude Include="warp_zone.h" />
     <ClInclude Include="scene.h" />
     <ClInclude Include="scene_manager.h" />
